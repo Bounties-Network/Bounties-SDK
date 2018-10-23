@@ -45,10 +45,11 @@ export function* getNetwork() {
   if (networkID === 1) {
     network = 'mainNet';
     apiEndpoint.set(config.settings.url.mainNet);
-  }
-  if (networkID === 4) {
+  } else if (networkID === 4) {
     network = 'rinkeby';
     apiEndpoint.set(config.settings.url.rinkeby);
+  } else {
+    apiEndpoint.set(config.settings.url.mainNet);
   }
 
   return network;

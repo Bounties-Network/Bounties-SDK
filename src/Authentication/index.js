@@ -119,6 +119,7 @@ function AuthenticationReducer(state = initialState, action) {
         getCurrentUserState: {
           ...state.getCurrentUserState,
           loading: false,
+          loaded: true,
           error: true
         }
       };

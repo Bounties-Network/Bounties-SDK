@@ -9,10 +9,7 @@ import { get } from 'lodash';
 
 const { SET_INITIALIZED } = clientActionTypes;
 const { LOGIN, LOGOUT } = actionTypes;
-// const {
-//   SAVE_SETTINGS_SUCCESS,
-//   SAVE_EMAIL_PREFERENCES_SUCCESS
-// } = settingsActionTypes;
+
 const {
   getCurrentUserSuccess,
   getCurrentUserFail,
