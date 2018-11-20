@@ -1,37 +1,19 @@
-import { flatten, groupBy, keys, values } from 'lodash';
+class Configuration {
+  get endpoint() {
+    return this._endpoint
+  }
 
-const config = require('./config.json');
+  set endpoint(newEndpoint) {
+    this._endpoint = newEndpoint
+  }
 
+  get standardBountiesAddress() {
+    return this._standardBountiesAddress
+  }
 
-let initialized = false;
-let moduleSettings = {};
-let platforms = {};
-let platform = {};
-let displayPlatforms = {};
-
-let obj = {
-  get settings() {
-    return {
-      initialized,
-      ...config,
-      ...moduleSettings,
-      platforms,
-      platform,
-      displayPlatforms
-    }
-  },
-  set settings(settings) {
-    initialized = true;
-    moduleSettings = settings;
-
-    if (settings.platforms) {
-      platforms = settings.platforms
-        ? settings.platforms
-        : groupBy(value => value, settings.platform.split(','));
-      platform = flatten(values(settings.platforms)).join(',');
-      displayPlatforms = keys(settings.platforms);
-    }
+  set standardBountiesAddress(address) {
+    this._standardBountiesAddress = address
   }
 }
 
-export default obj;
+export default new Configuration()

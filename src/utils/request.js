@@ -10,8 +10,6 @@ import {
 
 import { apiEndpoint } from './global';
 
-import rollbar from 'lib/rollbar';
-
 const POST_OPTIONS = {
   method: 'POST',
   headers: {
@@ -62,14 +60,12 @@ function handleError(err) {
       response.status === HTTP_401_UNAUTHORIZED ||
       response.status === HTTP_403_FORBIDDEN
     ) {
-      rollbar.warning('User session expired: relogin');
       // include redirect-type logic in here
     }
 
     if (response.status >= HTTP_500_INTERNAL_SERVER_ERROR) {
       error.errorStatus = response.status;
       error.errorMessage = response.statusText;
-      rollbar.error(`API Error: ${response.status}`, error);
       throw error;
     }
 
@@ -77,7 +73,6 @@ function handleError(err) {
   }
 
   error.errorMessage = err.message;
-  rollbar.error(`API Error: ${error.errorMessage}`, error);
   throw error;
 }
 
@@ -98,7 +93,7 @@ function checkRequestStatus(response) {
  *
  * @return {object}           The response data
  */
-export default function(url, method, options, customErrorHandler) {
+function request(url, method, options, customErrorHandler) {
   let bakedOptions;
   const endpoint = apiEndpoint.get();
   const method_type = typeof method === 'string' ? method : '';
@@ -125,3 +120,10 @@ export default function(url, method, options, customErrorHandler) {
     .then(checkRequestStatus)
     .catch(handleError);
 }
+
+export default { 
+  get: (url, query, customErrorHandler) => request(url, 'GET', { params: query }, customErrorHandler),
+  post: (url, data, customErrorHandler) => request(url, 'POST', { params: data }, customErrorHandler),  
+}
+
+

@@ -1,340 +1,184 @@
-const defaultGetBountyState = {
-  loading: false,
-  error: false
-};
+import request from '../utils/request'
+import { calculateDecimals } from '../utils/helpers';
 
-const defaultCreateDraftState = {
-  creating: false,
-  error: false
-};
+export const load = (id, params) => request.get(`bounty/${id}/`, params)
 
-const defaultStdBountyState = {
-  pending: false,
-  error: false
-};
+export const create = (values) => {
+    let tokenSymbol = 'ETH';
+    let contractFulfillmentAmount;
+    let contractBalance;
+  
+    const {
+        // issuer
+        issuerEmail,
+        issuerName,
 
-const defaultGetDraftState = {
-  loading: false,
-  error: false
-};
+        // metadata
+        title,
+        description,
+        categories,
+        revisions,
+        hasPrivateFulfillments,
+        experienceLevel,
+        uid,
 
-const initialState = {
-  getBountyState: { ...defaultGetBountyState },
-  createDraftState: { ...defaultCreateDraftState },
-  getDraftState: { ...defaultGetDraftState },
-  stdBountyState: { ...defaultStdBountyState }
-};
+        // attachments
+        ipfsHash,
+        ipfsFileName,
+        url,
 
-const GET_BOUNTY = 'bounty/GET_BOUNTY';
-const GET_BOUNTY_SUCCESS = 'bounty/GET_BOUNTY_SUCCESS';
-const GET_BOUNTY_FAIL = 'bounty/GET_BOUNTY_FAIL';
+        // payment   
+        paysTokens,
+        tokenContract,
+        tokenSymbol,
+        balance,
+        fulfillmentAmount,
+    } = values;
 
-function getBounty(id) {
-  return { type: GET_BOUNTY, id };
-}
+    const issuedData = {
+      payload: {
+        uid,
+        title,
+        description,
+        sourceFileHash: '',
+        sourceDirectoryHash: ipfsHash,
+        sourceFileName: ipfsFileName,
+        webReferenceURL: url,
+        categories,
+        revisions,
+        privateFulfillments: hasPrivateFulfillments,
+        created: parseInt(new Date().getTime() / 1000) | 0,
+        tokenAddress: tokenContract || '',
+        difficulty: experienceLevel,
+        issuer: {
+          address: userAddress,
+          email: issuerEmail,
+          name: issuerName
+        },
+        funders: [
+          {
+            address: userAddress,
+            email: issuerEmail,
+            name: issuerEmail
+          }
+        ],
+        symbol: tokenSymbol
+      },
+      meta: {
+        platform: config.settings.postingPlatform,
+        schemaVersion: config.settings.postingPlatform,
+        schemaName: config.settings.postingSchema
+      }
+    };
 
-function getBountySuccess(bounty) {
-  return { type: GET_BOUNTY_SUCCESS, bounty };
-}
-
-function getBountyFail(error) {
-  return { type: GET_BOUNTY_FAIL, error };
-}
-
-const UPDATE_DRAFT = 'bounty/UPDATE_DRAFT';
-const CREATE_DRAFT = 'bounty/CREATE_DRAFT';
-const CREATE_DRAFT_SUCCESS = 'bounty/CREATE_DRAFT_SUCCESS';
-const CREATE_DRAFT_FAIL = 'bounty/CREATE_DRAFT_FAIL';
-
-function updateDraft(bountyId, values) {
-  return { type: UPDATE_DRAFT, values, bountyId };
-}
-
-function createDraft(values) {
-  return { type: CREATE_DRAFT, values };
-}
-
-function createDraftSuccess(bounty) {
-  return { type: CREATE_DRAFT_SUCCESS, bounty };
-}
-
-function createDraftFail(error) {
-  return { type: CREATE_DRAFT_FAIL, error };
-}
-
-const GET_DRAFT = 'bounty/GET_DRAFT';
-const GET_DRAFT_SUCCESS = 'bounty/GET_DRAFT_SUCCESS';
-const GET_DRAFT_FAIL = 'bounty/GET_DRAFT_FAIL';
-
-function getDraft(id, issuer) {
-  return { type: GET_DRAFT, id, issuer };
-}
-
-function getDraftSuccess(bounty) {
-  return { type: GET_DRAFT_SUCCESS, bounty };
-}
-
-function getDraftFail(error) {
-  return { type: GET_DRAFT_FAIL, error };
-}
-
-const CREATE_BOUNTY = 'bounty/CREATE_BOUNTY';
-const KILL_BOUNTY = 'bounty/KILL_BOUNTY';
-const EXTEND_DEADLINE = 'bounty/EXTEND_DEADLINE';
-const TRANSFER_OWNERSHIP = 'bounty/TRANSFER_OWNERSHIP';
-const INCREASE_PAYOUT = 'bounty/INCREASE_PAYOUT';
-const ACTIVATE_BOUNTY = 'bounty/ACTIVATE_BOUNTY';
-const CONTRIBUTE = 'bounty/CONTRIBUTE';
-const STD_BOUNTY_SUCCESS = 'bounty/STD_BOUNTY_SUCCESS';
-const STD_BOUNTY_FAIL = 'bounty/STD_BOUNTY_FAIL';
-
-function createBounty(values, balance) {
-  return { type: CREATE_BOUNTY, values, balance };
-}
-
-function transferOwnership(id, address) {
-  return { type: TRANSFER_OWNERSHIP, id, address };
-}
-
-function killBounty(id) {
-  return { type: KILL_BOUNTY, id };
-}
-
-function extendDeadline(id, deadline) {
-  return { type: EXTEND_DEADLINE, id, deadline };
-}
-
-function contribute(id, value, paysTokens, decimals, tokenContract) {
-  return { type: CONTRIBUTE, id, value, paysTokens, decimals, tokenContract };
-}
-
-function increasePayout(
-  id,
-  fulfillmentAmount,
-  balance,
-  paysTokens,
-  decimals,
-  tokenContract
-) {
-  return {
-    type: INCREASE_PAYOUT,
-    id,
-    fulfillmentAmount,
-    balance,
-    paysTokens,
-    decimals,
-    tokenContract
-  };
-}
-
-function activateBounty(id, balance, paysTokens, decimals, tokenContract) {
-  return {
-    type: ACTIVATE_BOUNTY,
-    id,
-    balance,
-    paysTokens,
-    decimals,
-    tokenContract
-  };
-}
-
-function stdBountySuccess() {
-  return { type: STD_BOUNTY_SUCCESS };
-}
-
-function stdBountyFail() {
-  return { type: STD_BOUNTY_FAIL };
-}
-
-function BountyReducer(state = initialState, action) {
-  switch (action.type) {
-    case GET_BOUNTY: {
-      return {
-        ...state,
-        getBountyState: {
-          ...defaultGetBountyState,
-          loading: true,
-          error: false
-        }
-      };
+  
+    const ipfsHash = yield call(addJSON, issuedData);
+    const { standardBounties } = yield call(getContractClient);
+  
+    if (paysTokens) {
+      const { tokenContract: tokenContractClient } = yield call(
+        getTokenClient,
+        tokenContract
+      );
+      try {
+        const network = yield select(networkSelector);
+        yield call(
+          promisifyContractCall(tokenContractClient.approve, {
+            from: userAddress
+          }),
+          config[network].standardBountiesAddress,
+          contractBalance
+        );
+        yield call(delay, 2000);
+        const issuedBountyHash = yield call(
+          promisifyContractCall(standardBounties.issueAndActivateBounty, {
+            from: userAddress,
+            gas: 400000
+          }),
+          userAddress,
+          deadline,
+          ipfsHash,
+          contractFulfillmentAmount,
+          0x0,
+          paysTokens,
+          tokenContract || 0x0,
+          contractBalance
+        );
+        yield put(setPendingReceipt(issuedBountyHash));
+        return yield put(stdBountySuccess());
+      } catch (e) {
+        yield put(setTransactionError());
+        return yield put(stdBountyFail());
+      }
     }
-    case GET_BOUNTY_SUCCESS: {
-      const { bounty } = action;
+  
+    try {
+      const txHash = yield call(
+        promisifyContractCall(standardBounties.issueAndActivateBounty, {
+          from: userAddress,
+          value: contractBalance
+        }),
+        userAddress,
+        `${deadline}`,
+        ipfsHash,
+        contractFulfillmentAmount,
+        0x0,
+        paysTokens,
+        tokenContract || 0x0,
+        contractBalance
+      );
 
-      return {
-        ...state,
-        bounty,
-        getBountyState: {
-          ...defaultGetBountyState,
-          loading: false,
-          error: false
-        }
-      };
-    }
-    case GET_BOUNTY_FAIL: {
-      return {
-        ...state,
-        getBountyState: {
-          ...defaultGetBountyState,
-          loading: false,
-          error: true
-        }
-      };
-    }
-    case GET_DRAFT: {
-      return {
-        ...state,
-        getDraftState: {
-          ...state.getDraftState,
-          loading: true,
-          error: false
-        }
-      };
-    }
-    case GET_DRAFT_SUCCESS: {
-      const { bounty } = action;
 
-      return {
-        ...state,
-        draftBounty: bounty,
-        getDraftState: {
-          ...state.getDraftState,
-          loading: false
-        }
-      };
+      yield put(setPendingReceipt(txHash));
+      yield put(stdBountySuccess());
+    } catch (e) {
+      yield put(setTransactionError());
+      yield put(stdBountyFail());
     }
-    case GET_DRAFT_FAIL: {
-      return {
-        ...state,
-        getDraftState: {
-          ...state.getDraftState,
-          loading: false,
-          error: true
-        }
-      };
-    }
-    case KILL_BOUNTY:
-    case TRANSFER_OWNERSHIP:
-    case INCREASE_PAYOUT:
-    case EXTEND_DEADLINE:
-    case ACTIVATE_BOUNTY:
-    case CONTRIBUTE:
-    case CREATE_BOUNTY: {
-      return {
-        ...state,
-        stdBountyState: {
-          ...state.stdBountyState,
-          pending: true,
-          error: false
-        }
-      };
-    }
-    case STD_BOUNTY_SUCCESS: {
-      return {
-        ...state,
-        stdBountyState: {
-          ...state.stdBountyState,
-          pending: false
-        }
-      };
-    }
-    case STD_BOUNTY_FAIL: {
-      return {
-        ...state,
-        stdBountyState: {
-          ...state.stdBountyState,
-          pending: false,
-          error: true
-        }
-      };
-    }
-    case UPDATE_DRAFT: {
-      return {
-        ...state,
-        createDraftState: {
-          ...state.createDraftState,
-          creating: true,
-          error: false
-        }
-      };
-    }
-    case CREATE_DRAFT: {
-      return {
-        ...state,
-        createDraftState: {
-          ...state.createDraftState,
-          creating: true,
-          error: false
-        }
-      };
-    }
-    case CREATE_DRAFT_SUCCESS: {
-      return {
-        ...state,
-        createDraftState: {
-          ...state.createDraftState,
-          creating: false,
-          error: false
-        }
-      };
-    }
-    case CREATE_DRAFT_FAIL: {
-      return {
-        ...state,
-        createDraftState: {
-          ...state.createDraftState,
-          creating: false,
-          error: true
-        }
-      };
-    }
-    default:
-      return state;
   }
-}
 
-export const actions = {
-  getBounty,
-  getBountySuccess,
-  getBountyFail,
-  getDraft,
-  getDraftSuccess,
-  getDraftFail,
-  createBounty,
-  increasePayout,
-  activateBounty,
-  killBounty,
-  transferOwnership,
-  extendDeadline,
-  contribute,
-  stdBountySuccess,
-  stdBountyFail,
-  updateDraft,
-  createDraft,
-  createDraftSuccess,
-  createDraftFail
-};
 
-export const actionTypes = {
-  GET_BOUNTY,
-  GET_BOUNTY_SUCCESS,
-  GET_BOUNTY_FAIL,
-  GET_DRAFT,
-  GET_DRAFT_SUCCESS,
-  GET_DRAFT_FAIL,
-  UPDATE_DRAFT,
-  CREATE_BOUNTY,
-  INCREASE_PAYOUT,
-  EXTEND_DEADLINE,
-  ACTIVATE_BOUNTY,
-  KILL_BOUNTY,
-  CONTRIBUTE,
-  TRANSFER_OWNERSHIP,
-  CREATE_DRAFT,
-  CREATE_DRAFT_SUCCESS,
-  CREATE_DRAFT_FAIL,
-  STD_BOUNTY_SUCCESS,
-  STD_BOUNTY_FAIL
-};
+  const calcuBalance = () => {
 
-export default BountyReducer;
+  }
+
+  const calculateFulfillmentAmount = () => {
+
+  }
+
+  const getTokenData = () => {
+
+  }
+
+
+  const calculatePayment = (balance, fulfillmentAmount, token, paysTokens) => (
+    new Promise((resolve, reject) => {
+        if (paysTokens) {
+            try {
+                const { symbol, decimals } = yield call(getTokenData, token);
+
+                contractFulfillmentAmount = calculateDecimals(
+                    BigNumber(fulfillmentAmount, 10),
+                    decimals
+                );
+        
+                contractBalance = calculateDecimals(
+                    BigNumber(balance, 10),
+                    decimals
+                );
+            } catch (e) {
+                yield put(setTransactionError());
+                return yield put(stdBountyFail());
+            }
+        } else {
+            contractFulfillmentAmount = web3.utils.toWei(
+                BigNumber(calculated_fulfillmentAmount || fulfillmentAmount, 10).toString(),
+                'ether'
+            );
+            contractBalance = web3.utils.toWei(
+                BigNumber(balance, 10).toString(),
+                'ether'
+            );
+        }
+    })
+  )

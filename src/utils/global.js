@@ -2,7 +2,7 @@ import config from '../config';
 
 export let web3 = {};
 
-let API_ENDPOINT;
+let API_ENDPOINT = 'https://api.bounties.network';
 //let API_ENDPOINT = 'http://localhost:8000';
 // update this to be an env passthrough
 export const apiEndpoint = {

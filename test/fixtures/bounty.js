@@ -1,0 +1,102 @@
+export default {
+    "id": 1234,
+    "bountyStage": 1,
+    "categories": [
+        {
+            "id": 14,
+            "name": "JavaScript",
+            "normalized_name": "javascript"
+        },
+        {
+            "id": 16,
+            "name": "HTML",
+            "normalized_name": "html"
+        },
+        {
+            "id": 17,
+            "name": "CSS",
+            "normalized_name": "css"
+        },
+        {
+            "id": 29,
+            "name": "Shell",
+            "normalized_name": "shell"
+        },
+        {
+            "id": 486,
+            "name": "Dockerfile",
+            "normalized_name": "dockerfile"
+        }
+    ],
+    "current_market_token_data": {
+        "id": 2,
+        "normalized_name": "ethereum",
+        "name": "Ethereum",
+        "symbol": "ETH",
+        "price_usd": 153.84673764
+    },
+    "user": {
+        "id": 361,
+        "public_address": "0x0c54fccd2e384b4bb6f2e405bf5cbc15a017aafb",
+        "name": "Dan Finlay",
+        "email": "somniac@me.com",
+        "wants_marketing_emails": false,
+        "organization": "",
+        "small_profile_image_url": "https://assets.bounties.network/production/userimages/0x0c54fccd2e384b4bb6f2e405bf5cbc15a017aafb-920.jpg",
+        "large_profile_image_url": "https://assets.bounties.network/production/userimages/0x0c54fccd2e384b4bb6f2e405bf5cbc15a017aafb-740.jpg",
+        "page_preview": "https://assets.bounties.network/production/profile_preview/0x0c54fccd2e384b4bb6f2e405bf5cbc15a017aafb-2970e0b8-9afc-4490-b9c6-58bc5a4fe3b5.png",
+        "website": "",
+        "twitter": "",
+        "github": "danfinlay",
+        "linkedin": "",
+        "dribble": "",
+        "created": "2018-10-19T00:07:13.243450",
+        "edited": "2018-11-19T17:45:42.698513",
+        "last_viewed": null,
+        "last_logged_in": null,
+        "ens_domain": "",
+        "categories": [],
+        "languages": [],
+        "skills": []
+    },
+    "fulfillment_count": 0,
+    "comment_count": 0,
+    "created": "2018-09-18T21:16:32.471638",
+    "modified": "2018-11-19T17:45:37.750562",
+    "deadline": "2019-09-18T21:15:11",
+    "arbiter": "0x0000000000000000000000000000000000000000",
+    "private_fulfillments": false,
+    "fulfillmentAmount": "400000000000000000",
+    "calculated_fulfillmentAmount": "0.400000000000000000000000000000",
+    "paysTokens": false,
+    "experienceLevel": 1,
+    "revisions": null,
+    "title": "Conflict with Wordpress Gravityforms",
+    "description": "On a site that has no web3 functionality, metamask appears to get an error when a Gravityform is submitted with confirmation mode set to 'redirect'. This prevents the page from showing the confirmation.\r\n\r\nCurrently, the page is on a development env, not public, so it is hard to give you a reproduction. If there is interest, we could put one online. In the meantime, here is the Chrome console error:\r\n\r\n```\r\nUncaught ReferenceError: jQuery is not defined\r\n    at ?frame-view=true:158\r\n(anonymous) @ ?frame-view=true:158\r\nVM835 inpage.js:38 Uncaught Error: MetaMask detected another web3.\r\n     MetaMask will not work reliably with another web3 extension.\r\n     This usually happens if you have two MetaMasks installed,\r\n     or MetaMask and another web3 extension. Please remove one\r\n     and try again.\r\n    at Object.eval (inpage.js:38)\r\n    at Object.1../lib/auto-reload.js (inpage.js:80)\r\n    at s (inpage.js:1)\r\n    at e (inpage.js:1)\r\n    at eval (inpage.js:1)\r\n    at eval (<anonymous>)\r\n    at VM741 jquery.js?ver=1.12.4:2\r\n    at Function.globalEval (VM741 jquery.js?ver=1.12.4:2)\r\n    at Ha (VM741 jquery.js?ver=1.12.4:3)\r\n    at a.fn.init.append (VM741 jquery.js?ver=1.12.4:3)\r\n(anonymous) @ VM835 inpage.js:38\r\n1../lib/auto-reload.js @ VM835 inpage.js:80\r\ns @ VM835 inpage.js:1\r\ne @ VM835 inpage.js:1\r\n(anonymous) @ VM835 inpage.js:1\r\n(anonymous) @ VM741 jquery.js?ver=1.12.4:2\r\nglobalEval @ VM741 jquery.js?ver=1.12.4:2\r\nHa @ VM741 jquery.js?ver=1.12.4:3\r\nappend @ VM741 jquery.js?ver=1.12.4:3\r\n(anonymous) @ ?frame-view=true:381\r\ndispatch @ VM741 jquery.js?ver=1.12.4:3\r\nr.handle @ VM741 jquery.js?ver=1.12.4:3\r\n```\r\n\r\n  *  Expected Behavior\r\nMetamask should have no effect on the page.\r\n\r\n  *  Actual Behavior\r\nMetamask error halts js execution on the page.\r\n\r\n  *  Browser Used\r\nChrome\r\n\r\n  *  Operating System Used\r\nOSX",
+    "tokenSymbol": "ETH",
+    "tokenDecimals": 18,
+    "tokenContract": "0x0000000000000000000000000000000000000000",
+    "usd_price": 61.538695056,
+    "issuer_name": "Dan Finlay",
+    "issuer_email": "somniac@me.com",
+    "issuer_githubUsername": "danfinlay",
+    "issuer_address": "0x0c54fccd2e384b4bb6f2e405bf5cbc15a017aafb",
+    "sourceFileName": "",
+    "sourceFileHash": "",
+    "sourceDirectoryHash": "",
+    "webReferenceURL": "https://github.com/MetaMask/metamask-extension/issues/3073",
+    "platform": "gitcoin",
+    "schemaVersion": "0.1",
+    "schemaName": "gitcoinBounty",
+    "uid": "",
+    "bounty_created": "2018-09-18T21:16:18",
+    "bounty_id": 1234,
+    "data": "QmZVcSCctZxxfyFDcdozSNXcEwfzashUzsnTygcw2ds9wK",
+    "issuer": "0x0c54fccd2e384b4bb6f2e405bf5cbc15a017aafb",
+    "old_balance": null,
+    "tokenLockPrice": null,
+    "balance": "400000000000000000",
+    "calculated_balance": "0.400000000000000000000000000000",
+    "image_preview": "https://assets.bounties.network/production/bounty_preview/1234-42345141-c0c2-4ff4-a349-8dd321612fa5.png",
+    "token": 2
+}

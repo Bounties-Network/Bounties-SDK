@@ -6,8 +6,7 @@
   "scripts": {
     "build": "webpack --env dev && webpack --env build",
     "dev": "webpack --progress --colors --watch --env dev",
-    "test": "mocha --require babel-register --colors ./test/*.spec.js",
-    "test:watch": "mocha --require babel-register --colors -w ./test/*.spec.js"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -33,12 +32,12 @@
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-plugin-import": "^1.10.0",
     "babel-register": "^7.0.0-beta.3",
-    "chai": "^4.1.2",
     "eslint": "^5.0.1",
     "eslint-loader": "^2.0.0",
+    "jest": "^23.6.0",
     "jsdom": "11.11.0",
     "jsdom-global": "3.0.2",
-    "mocha": "^4.0.1",
+    "nock": "^10.0.2",
     "uglifyjs-webpack-plugin": "^1.2.7",
     "webpack": "^4.12.2",
     "webpack-cli": "^3.0.8",
@@ -55,5 +54,11 @@
     "reselect": "^4.0.0",
     "rollbar": "^2.4.7",
     "web3": "^1.0.0-beta.36"
+  },
+  "resolutions": {
+    "babel-core": "7.0.0-bridge.0"
+  },
+  "jest": {
+    "testEnvironment": "node"
   }
 }
