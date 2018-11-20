@@ -1,9 +1,12 @@
-import request from '../utils/request'
-import { calculateDecimals } from '../utils/helpers';
+import request from '../../utils/request'
+import { calculateDecimals } from '../../utils/helpers';
 
-export const load = (id, params) => request.get(`bounty/${id}/`, params)
+export function load(id, params) {
+    return request.get(`bounty/${id}/`, params) 
+}
 
-export const create = (values) => {
+/*
+export function create(values) {
     let tokenSymbol = 'ETH';
     let contractFulfillmentAmount;
     let contractBalance;
@@ -182,3 +185,6 @@ export const create = (values) => {
         }
     })
   )
+*/
+
+  export default { load }
