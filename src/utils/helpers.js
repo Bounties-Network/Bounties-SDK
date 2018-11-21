@@ -1,4 +1,3 @@
-import web3 from './Web3Client';
 import { each as fpEach } from 'lodash';
 import { BigNumber } from 'bignumber.js';
 
@@ -61,7 +60,7 @@ export const promisifyContractCall = (contractFunction, options) => (
 
 export const batchContractMethods = (...methods) => {
   return new Promise((resolve, reject) => {
-    const batch = new web3.eth.BatchRequest();
+    const batch = new this._web3.eth.BatchRequest();
     let completedCount = 0;
     const txHashes = [];
     each((method, idx) => {

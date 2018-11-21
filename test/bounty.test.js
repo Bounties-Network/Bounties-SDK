@@ -5,7 +5,7 @@ import Bounties from '../src/bounties'
 
 nock.disableNetConnect()
 const mock = nock('https://api.bounties.network/')
-const bounties = new Bounties(1,2)
+const bounties = new Bounties(null, '0x2af47a65da8CD66729b4209C22017d6A5C2d2400')
 
 describe('bounty module', () => {
     it('should load bounty with specified id', async () => {

@@ -1,35 +1,32 @@
-import bounty from './resources/Bounty'
+import Web3 from 'web3'
+import interfaces from './interfaces.json'
 
 class Bounties {
-    constructor(web3, standardBountiesAddress) {
+    constructor(web3, contractAddress) {
+        if (!(web3 instanceof Web3)) {
+            web3 = new Web3(new Web3.providers.HttpProvider('https://rinkeby.infura.io'))
+        }
+
         this._web3 = web3
-        this._standardBountiesAddress = standardBountiesAddress
+        this._contractAddress = contractAddress
         this._endpoint = 'https://api.bounties.network'
 
         this.resources = {
-            bounty
+            request: require('./utils/request'),
+            bounty: require('./resources/Bounty')
         }
 
         for (let key in this.resources) {
-            this[key] = this.resources[key]
+            this[key] = new this.resources[key].default(this)
         }
-
     }
 
-    get endpoint() {
-      return this._endpoint
+    set contractAddress(address) {
+      this._contractAddress = address
     }
-  
-    set endpoint(newEndpoint) {
-      this._endpoint = newEndpoint
-    }
-  
-    get standardBountiesAddress() {
-      return this._standardBountiesAddress
-    }
-  
-    set standardBountiesAddress(address) {
-      this._standardBountiesAddress = address
+
+    get contract() {
+        return new this._web3.eth.Contract(interfaces.StandardBounties, this._contractAddress).methods
     }
 }
   

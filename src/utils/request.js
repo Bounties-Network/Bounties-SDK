@@ -8,8 +8,6 @@ import {
   HTTP_300_MULTIPLE_CHOICES
 } from './constants';
 
-import { apiEndpoint } from './global';
-
 const POST_OPTIONS = {
   method: 'POST',
   headers: {
@@ -51,6 +49,14 @@ const GET_OPTIONS = {
   withCredentials: true
 };
 
+const OPTIONS = {
+  'PUT': PUT_OPTIONS,
+  'POST': POST_OPTIONS,
+  'PATCH': PATCH_OPTIONS,
+  'OPTIONS': OPTIONS_OPTIONS,
+  'GET': GET_OPTIONS
+}
+
 function handleError(err) {
   const error = new Error();
   error.errorStatus = '';
@@ -85,45 +91,25 @@ function checkRequestStatus(response) {
   }
 }
 
-/**
- * Requests a URL, returning a promise
- *
- * @param  {string} url       The URL we want to request
- * @param  {object} [options] The options we want to pass to "fetch"
- *
- * @return {object}           The response data
- */
-function request(url, method, options, customErrorHandler) {
-  let bakedOptions;
-  const endpoint = apiEndpoint.get();
-  const method_type = typeof method === 'string' ? method : '';
-  switch ((method_type || '').toUpperCase()) {
-    case 'PUT':
-      bakedOptions = PUT_OPTIONS;
-      break;
-    case 'POST':
-      bakedOptions = POST_OPTIONS;
-      break;
-    case 'PATCH':
-      bakedOptions = PATCH_OPTIONS;
-      break;
-    case 'OPTIONS':
-      bakedOptions = OPTIONS_OPTIONS;
-      break;
-    default:
-      bakedOptions = GET_OPTIONS;
+export default class Request {
+  constructor(bounties) {
+    this._bounties = bounties
+    this._endpoint = bounties._endpoint
   }
 
-  const requestUrl = url.slice(0, 4) === 'http' ? url : `${endpoint}/${url}`;
-  return axios
-    .request(requestUrl, { ...bakedOptions, ...options })
-    .then(checkRequestStatus)
-    .catch(handleError);
+  request(url, endpoint, method='GET', options, customErrorHandler) {
+    const requestUrl = url.slice(0, 4) === 'http' ? url : `${endpoint}/${url}`;
+    return axios
+      .request(requestUrl, { ...OPTIONS[method.toUpperCase()], ...options })
+      .then(checkRequestStatus)
+      .catch(handleError);
+  }
+ 
+  get(url, query, customErrorHandler) { 
+    return this.request(url, this._endpoint, 'GET', { params: query }, customErrorHandler) 
+  }
+  
+  post(url, data, customErrorHandler) { 
+    return this.request(url, this._endpoint, 'POST', { params: data }, customErrorHandler) 
+  }
 }
-
-export default { 
-  get: (url, query, customErrorHandler) => request(url, 'GET', { params: query }, customErrorHandler),
-  post: (url, data, customErrorHandler) => request(url, 'POST', { params: data }, customErrorHandler),  
-}
-
-
