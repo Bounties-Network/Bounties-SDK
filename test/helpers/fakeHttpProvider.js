@@ -43,7 +43,7 @@ FakeHttpProvider.prototype.send = function (payload, callback) {
     expect(utils.isArray(payload) || utils.isObject(payload)).toEqual(true);
     expect(utils.isFunction(callback)).toEqual(true);
 
-    // console.log(payload)
+    console.log(payload)
 
     var validation = this.validation.shift();
 

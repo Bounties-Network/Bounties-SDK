@@ -27,6 +27,35 @@ export const rawBountyPayload = {
     fulfillmentAmount: 10 * 10**18,
 }
 
+export const rawBountyPayloadPaysTokens = {
+    // issuer
+    issuerAddress: '0xE23F91725c6c18204743592F963688B8B8DC2ceD',
+    issuerEmail: 'matt@bounties.network',
+    issuerName: 'Matt Garnett',
+
+    // metadata
+    title: 'Just another bounty',
+    description: 'The description of a beautiful bounty',
+    categories: ['javascript', 'honey'],
+    revisions: 12,
+    deadline: 1543167216,
+    hasPrivateFulfillments: false,
+    experienceLevel: 'Beginner',
+    uid: null,
+
+    // attachments
+    ipfsHash: 'QmP8QJoTxvxnFm3WSsdG3SdVDSvktJkcmrQ7PmY3Q2D7RX',
+    ipfsFileName: 'Ethereum%20magicians.zip',
+    url: 'https://twitter.com/TheCryptoDog/status/1060233070677254144',
+
+    // payment   
+    paysTokens: true,
+    tokenContract: '0xB8c77482e45F1F44dE1745F52C74426C631bDD52',
+    tokenSymbol: 'TOKEN',
+    balance: 10 * 10**18,
+    fulfillmentAmount: 10 * 10**18,
+}
+
 export const bountyPayload = {
     // issuer
     issuer: {

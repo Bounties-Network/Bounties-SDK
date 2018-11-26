@@ -4,7 +4,7 @@ import { addJSON, addBuffer } from './utils/helpers'
 import interfaces from './interfaces.json'
 
 class Bounties {
-    constructor(web3, ipfs, contractAddress, meta) {
+    constructor(web3, ipfs, factoryAddress, meta) {
         if (!(web3 instanceof Web3)) {
             web3 = new Web3(new Web3.providers.HttpProvider('https://rinkeby.infura.io'))
         }
@@ -15,7 +15,7 @@ class Bounties {
 
         this._web3 = web3
         this._ipfs = { addJSON: addJSON(ipfs.addJSON), addBuffer: addBuffer(ipfs.add), ipfs }
-        this._contractAddress = contractAddress
+        this._factoryAddress = factoryAddress
         this._endpoint = 'https://api.bounties.network'
         this._meta = meta || {
             platform: 'bounties-network"',
@@ -31,18 +31,21 @@ class Bounties {
         for (let key in this.resources) {
             this[key] = new this.resources[key].default(this)
         }
+
+        // bind class methods
+        this.tokenClient = this.tokenClient.bind(this)
     }
 
-    set contractAddress(address) {
-      this._contractAddress = address
+    set factoryAddress(address) {
+      this._factoryAddress = address
     }
 
-    get contract() {
-        return new this._web3.eth.Contract(interfaces.StandardBounties, this._contractAddress)
+    get factory() {
+        return new this._web3.eth.Contract(interfaces.StandardBounty, this._factoryAddress)
     }
 
-    tokenClient(address) {
-        return new this._web3.eth.Contract(interfaces.Token, address)
+    tokenClient(address, type='HumanStandardToken') {
+        return new this._web3.eth.Contract(interfaces[type], address)
     }
 }
   

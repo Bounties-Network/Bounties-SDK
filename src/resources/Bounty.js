@@ -13,32 +13,60 @@ export default class Bounty {
         return this.request.get(`bounty/${id}/`, params) 
     }
 
-    create(values, gas=40000, gasPrice=5) {
+    /*
+    bounty = {
+            title,
+            body,
+            categories,
+            expectedNumberOfRevisions,
+            hasPrivateFulfillments,
+            difficulty,
+            attachments: {
+                ipfsHash,
+                ipfsFileName,
+                url,
+            },
+            metadata: this.bounties._meta 
+        }
+    */
+    create(bounty, gasPrice=undefined) {
         return new Promise(async (resolve, reject) => {
-            const { contract: standardBounties, tokenClient, _ipfs: ipfs } = this.bounties
-
-            const payload = this.generatePayload(values)
-            const { balance, deadline, fulfillmentAmount, issuer, paysTokens, tokenContract: tokenAddress } = payload
+            const bounties = this.bounties
+            const { 
+                tokenClient, 
+                _ipfs: ipfs 
+            } = bounties
 
             try {
-                const ipfsHash = await ipfs.addJSON(payload)
+                const ipfsHash = await ipfs.addJSON(bounty)
         
                 if (paysTokens) {
-                    tokenContract = tokenClient(tokenAddress)
-                    tokenContract.methods.approve(standardBounties.address, balance).send({ from: issuer.address })
+                    const tokenContract = tokenClient(tokenAddress)
+                    
+                    const approve = promisifyContractCall(
+                        tokenContract.methods.approve, 
+                        {
+                            from: issuer.address,
+                            gas: 40000,
+                            gasPrice
+                        }
+                    )
+
+                    await approve(bounties.contract.options.address, balance)
                 }
 
-                const issueAndActivateBounty = promisifyContractCall(
-                    standardBounties.methods.issueAndActivateBounty, {
+                const createBounty = promisifyContractCall(
+                    bounties.factory.methods.createBounty, 
+                    {
                         from: issuer.address,
                         value: paysTokens ? '0' : balance,
-                        gas: gas,
-                        gasPrice: gasPrice
+                        gas: 40000,
+                        gasPrice
                     }
                 )
 
-                const txHash = await issueAndActivateBounty(
-                    issuer.address,
+                const transactionHash = await createBounty(
+                    bounty.controller.address,
                     deadline,
                     ipfsHash,
                     fulfillmentAmount,
@@ -48,12 +76,25 @@ export default class Bounty {
                     balance
                 )
                 
-                resolve(txHash)
+                resolve(transactionHash)
             } catch (e) {
                 console.log(e)
                 reject(e)
             }
         })
+    }
+
+    kill(id, issuerAddress, gasPrice=undefined) {
+        const killBounty = promisifyContractCall(
+            this.bounties.contract.methods.killBounty, 
+            {
+                from: issuerAddress,
+                gas: 40000,
+                gasPrice
+            }
+        )
+
+        return killBounty(id)
     }
 
     generatePayload(values) {
@@ -86,43 +127,7 @@ export default class Bounty {
             fulfillmentAmount,
         } = values;
     
-        return {
-            issuer: {
-                address: issuerAddress,
-                email: issuerEmail,
-                name: issuerName
-            },
-
-            funders: [{
-                address: issuerAddress,
-                email: issuerEmail,
-                name: issuerName
-            }],
-
-            // metadata
-            title,
-            description,
-            categories,
-            revisions,
-            hasPrivateFulfillments,
-            experienceLevel,
-            deadline: deadline.toString(10),
-            created: parseInt(new Date().getTime() / 1000) | 0,
-            uid,
-
-            // attachments
-            ipfsHash,
-            ipfsFileName,
-            url,
-
-            // payment   
-            paysTokens,
-            tokenContract,
-            tokenSymbol,
-            balance: balance.toString(10),
-            fulfillmentAmount: fulfillmentAmount.toString(10),
-
-            meta: this.bounties._meta 
-        }
+        return 
+        
     }
 }
