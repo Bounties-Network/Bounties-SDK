@@ -1,150 +1,128 @@
 import request from '../utils/request'
-import { calculateDecimals } from '../utils/helpers';
-import { addJSON } from '../utils/ipfsClient';
+import { calculateDecimals, promisifyContractCall } from '../utils/helpers'
+import { BigNumber } from 'bignumber.js'
 
 
 export default class Bounty {
-  constructor(bounties) {
-    this._bounties = bounties
-    this.request = bounties.request
-  }
-
-  load(id, params) {
-    return this.request.get(`bounty/${id}/`, params) 
-  }
-}
-
-/*
-export function create(values) {
-    const payload = generatePayload(values)
-    const ipfsHash = addJSON(payload)
-    const { standardBounties } = yield call(getContractClient);
-  
-    if (paysTokens) {
-      const { tokenContract: tokenContractClient } = yield call(
-        getTokenClient,
-        tokenContract
-      );
-      try {
-        const network = yield select(networkSelector);
-        yield call(
-          promisifyContractCall(tokenContractClient.approve, {
-            from: userAddress
-          }),
-          config[network].standardBountiesAddress,
-          contractBalance
-        );
-        yield call(delay, 2000);
-        const issuedBountyHash = yield call(
-          promisifyContractCall(standardBounties.issueAndActivateBounty, {
-            from: userAddress,
-            gas: 400000
-          }),
-          userAddress,
-          deadline,
-          ipfsHash,
-          contractFulfillmentAmount,
-          0x0,
-          paysTokens,
-          tokenContract || 0x0,
-          contractBalance
-        );
-        yield put(setPendingReceipt(issuedBountyHash));
-        return yield put(stdBountySuccess());
-      } catch (e) {
-        yield put(setTransactionError());
-        return yield put(stdBountyFail());
-      }
+    constructor(bounties) {
+        this.bounties = bounties
+        this.request = bounties.request
     }
-  
-    try {
-      const txHash = yield call(
-        promisifyContractCall(standardBounties.issueAndActivateBounty, {
-          from: userAddress,
-          value: contractBalance
-        }),
-        userAddress,
-        `${deadline}`,
-        ipfsHash,
-        contractFulfillmentAmount,
-        0x0,
-        paysTokens,
-        tokenContract || 0x0,
-        contractBalance
-      );
 
-
-      yield put(setPendingReceipt(txHash));
-      yield put(stdBountySuccess());
-    } catch (e) {
-      yield put(setTransactionError());
-      yield put(stdBountyFail());
+    load(id, params) {
+        return this.request.get(`bounty/${id}/`, params) 
     }
-  }
 
+    create(values, gas=40000, gasPrice=5) {
+        return new Promise(async (resolve, reject) => {
+            const { contract: standardBounties, tokenClient, _ipfs: ipfs } = this.bounties
 
-function generatePayload() {
-    const {
-        // issuer
-        issuerEmail,
-        issuerName,
+            const payload = this.generatePayload(values)
+            const { balance, deadline, fulfillmentAmount, issuer, paysTokens, tokenContract: tokenAddress } = payload
 
-        // metadata
-        title,
-        description,
-        categories,
-        revisions,
-        hasPrivateFulfillments,
-        experienceLevel,
-        uid,
+            try {
+                const ipfsHash = await ipfs.addJSON(payload)
+        
+                if (paysTokens) {
+                    tokenContract = tokenClient(tokenAddress)
+                    tokenContract.methods.approve(standardBounties.address, balance).send({ from: issuer.address })
+                }
 
-        // attachments
-        ipfsHash,
-        ipfsFileName,
-        url,
- 
-        // payment   
-        paysTokens,
-        tokenContract,
-        tokenSymbol,
-        balance,
-        fulfillmentAmount,
-    } = values;
+                const issueAndActivateBounty = promisifyContractCall(
+                    standardBounties.methods.issueAndActivateBounty, {
+                        from: issuer.address,
+                        value: paysTokens ? '0' : balance,
+                        gas: gas,
+                        gasPrice: gasPrice
+                    }
+                )
 
-    return {
-        payload: {
-        uid,
-        title,
-        description,
-        sourceFileHash: '',
-        sourceDirectoryHash: ipfsHash,
-        sourceFileName: ipfsFileName,
-        webReferenceURL: url,
-        categories,
-        revisions,
-        privateFulfillments: hasPrivateFulfillments,
-        created: parseInt(new Date().getTime() / 1000) | 0,
-        tokenAddress: tokenContract || '',
-        difficulty: experienceLevel,
-        issuer: {
-            address: userAddress,
-            email: issuerEmail,
-            name: issuerName
-        },
-        funders: [
-            {
-            address: userAddress,
-            email: issuerEmail,
-            name: issuerEmail
+                const txHash = await issueAndActivateBounty(
+                    issuer.address,
+                    deadline,
+                    ipfsHash,
+                    fulfillmentAmount,
+                    '0x000000000000000000000000000000000000dead',
+                    paysTokens,
+                    tokenAddress || '0x0000000000000000000000000000000000000000',
+                    balance
+                )
+                
+                resolve(txHash)
+            } catch (e) {
+                console.log(e)
+                reject(e)
             }
-        ],
-        symbol: tokenSymbol
-        },
-        meta: {
-        platform: config.settings.postingPlatform,
-        schemaVersion: config.settings.postingPlatform,
-        schemaName: config.settings.postingSchema
+        })
+    }
+
+    generatePayload(values) {
+        const {
+            // issuer
+            issuerAddress,
+            issuerEmail,
+            issuerName,
+
+            // metadata
+            title,
+            description,
+            categories,
+            revisions,
+            hasPrivateFulfillments,
+            experienceLevel,
+            deadline,
+            uid,
+
+            // attachments
+            ipfsHash,
+            ipfsFileName,
+            url,
+
+            // payment   
+            paysTokens,
+            tokenContract,
+            tokenSymbol,
+            balance,
+            fulfillmentAmount,
+        } = values;
+    
+        return {
+            issuer: {
+                address: issuerAddress,
+                email: issuerEmail,
+                name: issuerName
+            },
+
+            funders: [{
+                address: issuerAddress,
+                email: issuerEmail,
+                name: issuerName
+            }],
+
+            // metadata
+            title,
+            description,
+            categories,
+            revisions,
+            hasPrivateFulfillments,
+            experienceLevel,
+            deadline: deadline.toString(10),
+            created: parseInt(new Date().getTime() / 1000) | 0,
+            uid,
+
+            // attachments
+            ipfsHash,
+            ipfsFileName,
+            url,
+
+            // payment   
+            paysTokens,
+            tokenContract,
+            tokenSymbol,
+            balance: balance.toString(10),
+            fulfillmentAmount: fulfillmentAmount.toString(10),
+
+            meta: this.bounties._meta 
         }
     }
 }
-*/

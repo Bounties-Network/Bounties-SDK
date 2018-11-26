@@ -80,3 +80,33 @@ export const batchContractMethods = (...methods) => {
     batch.execute();
   });
 };
+
+export const addBuffer = add => (filename, bufferContent) =>
+  new Promise((resolve, reject) => {
+    // due to es5 issues - we load this via a CDN
+    // const ipfs = window.IpfsApi({
+    //   host: 'ipfs.infura.io',
+    //   port: 5001,
+    //   protocol: 'https'
+    // });
+
+    add(
+      [{ path: `/bounties/${filename}`, content: bufferContent }],
+      (err, response) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(response[1].hash);
+      }
+    );
+  });
+
+export const addJSON = addJSON => data =>
+  new Promise((resolve, reject) => {
+    addJSON(data, (err, response) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(response);
+    });
+  });

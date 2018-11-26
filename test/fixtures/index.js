@@ -1,2 +1,4 @@
-import bounty from './bounty'
-export default { bounty }
+import bounty from './Bounty'
+import { bountyPayload, rawBountyPayload } from './BountyPayload'
+
+export default { bounty, bountyPayload, rawBountyPayload }

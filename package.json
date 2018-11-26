@@ -7,7 +7,7 @@
     "build": "webpack --env dev && webpack --env build",
     "dev": "webpack --progress --colors --watch --env dev",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "TERM=dumb jest --watch"
   },
   "repository": {
     "type": "git",
