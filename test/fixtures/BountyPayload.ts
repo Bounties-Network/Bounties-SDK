@@ -78,7 +78,7 @@ export const bountyPayload = {
     hasPrivateFulfillments: rawBountyPayload.hasPrivateFulfillments,
     experienceLevel: rawBountyPayload.experienceLevel,
     deadline: rawBountyPayload.deadline.toString(10),
-    created: parseInt(new Date(1998, 9, 29).getTime() / 1000) | 0,
+    created: (new Date(1998, 9, 29).getTime() / 1000) | 0,
     uid: rawBountyPayload.uid,
 
     // attachments

@@ -1,0 +1,103 @@
+[
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "masterCopy",
+        "outputs": [
+            {
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "bounties",
+        "outputs": [
+            {
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "_masterCopy",
+                "type": "address"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "name": "_bountyId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "name": "_contractAddress",
+                "type": "address"
+            }
+        ],
+        "name": "BountyCreated",
+        "type": "event"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "_controller",
+                "type": "address"
+            },
+            {
+                "name": "_arbiter",
+                "type": "address"
+            },
+            {
+                "name": "_data",
+                "type": "string"
+            },
+            {
+                "name": "_deadline",
+                "type": "uint256"
+            }
+        ],
+        "name": "createBounty",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "getNumBounties",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    }
+]

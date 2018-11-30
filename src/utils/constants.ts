@@ -10,6 +10,7 @@ export const HTTP_422_UNKNOWN = 422;
 export const HTTP_500_INTERNAL_SERVER_ERROR = 500;
 export const HTTP_503_SERVICE_UNAVAILABLE = 503;
 
+/*
 export const DEFAULT_MARKDOWN = `# Description
 Description of the bounty
 ## Definition of Done
@@ -177,3 +178,4 @@ export const notification_template = {
     icon: minus
   }
 };
+*/

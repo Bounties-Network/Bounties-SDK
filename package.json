@@ -1,65 +1,65 @@
 {
-  "name": "@bounties-network/modules",
-  "version": "0.0.2",
-  "description": "Produce universal library with webpack and es6",
-  "main": "lib/main.js",
-  "scripts": {
-    "build": "webpack --env dev && webpack --env build",
-    "dev": "webpack --progress --colors --watch --env dev",
-    "test": "jest",
-    "test:watch": "TERM=dumb jest --watch"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/krasimir/webpack-library-starter.git"
-  },
-  "keywords": [
-    "webpack",
-    "es6",
-    "starter",
-    "library",
-    "universal",
-    "umd",
-    "commonjs"
-  ],
-  "author": "Bounties Network",
-  "license": "MIT",
-  "homepage": "https://bounties.network",
-  "devDependencies": {
-    "@babel/preset-env": "^7.1.0",
-    "@babel/preset-react": "^7.0.0",
-    "babel-eslint": "^8.0.3",
-    "babel-loader": "^8.0.0-beta.4",
-    "babel-plugin-add-module-exports": "^0.2.1",
-    "babel-plugin-import": "^1.10.0",
-    "babel-register": "^7.0.0-beta.3",
-    "eslint": "^5.0.1",
-    "eslint-loader": "^2.0.0",
-    "jest": "^23.6.0",
-    "jsdom": "11.11.0",
-    "jsdom-global": "3.0.2",
-    "nock": "^10.0.2",
-    "uglifyjs-webpack-plugin": "^1.2.7",
-    "webpack": "^4.12.2",
-    "webpack-cli": "^3.0.8",
-    "yargs": "^10.0.3"
-  },
-  "dependencies": {
-    "@babel/cli": "^7.1.2",
-    "@babel/core": "^7.1.2",
-    "axios": "^0.18.0",
-    "bignumber.js": "^7.2.1",
-    "ipfs-mini": "^1.1.2",
-    "moment": "^2.22.2",
-    "redux-saga": "^0.16.2",
-    "reselect": "^4.0.0",
-    "rollbar": "^2.4.7",
-    "web3": "^1.0.0-beta.36"
-  },
-  "resolutions": {
-    "babel-core": "7.0.0-bridge.0"
-  },
-  "jest": {
-    "testEnvironment": "node"
-  }
+    "name": "@bounties-network/modules",
+    "version": "0.0.2",
+    "description": "Produce universal library with webpack and es6",
+    "main": "lib/index.js",
+    "typings": "lib/index.d.js",
+    "scripts": {
+        "build": "yarn postinstall && tsc",
+        "compile": "tsc",
+        "test": "jest",
+        "test:watch": "TERM=dumb jest --watch",
+        "postinstall": "typechain --target web3-1.0.0 --outDir src/contracts/types \"src/contracts/abi/**/*.json\""
+    },
+    
+    "files": [
+        "lib"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/krasimir/webpack-library-starter.git"
+    },
+    "keywords": [
+        "webpack",
+        "es6",
+        "starter",
+        "library",
+        "universal",
+        "umd",
+        "commonjs"
+    ],
+    "author": "Bounties Network",
+    "license": "MIT",
+    "homepage": "https://bounties.network",
+    "dependencies": {
+        "axios": "^0.18.0",
+        "bignumber.js": "^7.2.1",
+        "ipfs-mini": "^1.1.2",
+        "reselect": "^4.0.0",
+        "web3": "^1.0.0-beta.36"
+    },
+    "devDependencies": {
+        "@types/jest": "^23.3.9",
+        "@types/web3": "^1.0.12",
+        "@types/nock": "^9.3.0",
+        "jest": "^23.6.0",
+        "nock": "^10.0.2",
+        "ts-jest": "^23.10.5",
+        "typechain": "^0.3.9",
+        "typescript": "^3.1.6",
+        "yargs": "^10.0.3"
+    },
+    "jest": {
+        "testEnvironment": "node",
+        "transform": {
+            "^.+\\.tsx?$": "ts-jest"
+        },
+        "moduleFileExtensions": [
+            "ts",
+            "js",
+            "json",
+            "node"
+        ],
+        "testRegex": "^.+\\.spec\\.ts$"
+    }
 }
