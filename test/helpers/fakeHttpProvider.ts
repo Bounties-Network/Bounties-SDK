@@ -5,7 +5,7 @@ const isArray    = (object: any) => Array.isArray(object)
 const isFunction = (object: any) => typeof object === 'function'
 
 type ValidationCallback = (
-    payload: JsonRPCRequest, 
+    payload: JsonRPCRequest,
     callback: (e: Error, val: JsonRPCResponse) => void
 ) => void
 
@@ -42,22 +42,22 @@ export class FakeHttpProvider implements Provider {
             this.countId = payload.id;
         // else
         //     this.countId++;
-    
+
         expect(isArray(payload) || isObject(payload)).toEqual(true);
         expect(isFunction(callback)).toEqual(true);
-    
+
         console.log(payload)
-    
+
         var validation = this.validation.shift();
-    
+
         if (validation) {
             // imitate plain json object
             validation(JSON.parse(JSON.stringify(payload)), callback);
         }
-    
+
         let response = this.getResponse(payload)
         let error = this.getError(payload)
-    
+
         setTimeout(function(){
             callback(null, response);
         }, 1)
@@ -75,13 +75,13 @@ export class FakeHttpProvider implements Provider {
             } else
                 response.id = payload.id;
         }
-    
+
         return response;
     }
 
     getError(payload: JsonRPCResponse) {
         const response = this.error.shift() as any
-    
+
         if(response) {
             if(isArray(response)) {
                 // response = response.map((resp, index) => {
@@ -91,18 +91,18 @@ export class FakeHttpProvider implements Provider {
             } else
                 response.id = payload.id
         }
-    
+
         return response
     }
 
     injectValidation(callback: ValidationCallback) {
         this.validation.push(callback);
     }
-    
+
     injectResult(result: any) {
         let response = this.getResponseStub();
         response.result = result;
-    
+
         this.response.push(response);
     };
 }

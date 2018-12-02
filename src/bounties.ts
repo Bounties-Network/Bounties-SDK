@@ -3,7 +3,7 @@ import IPFSMini from 'ipfs-mini';
 import { addJSON } from './utils/helpers'
 import { interfaces } from './contracts/interfaces'
 
-import { BountyClient } from './resources/Bounty'
+import { BountiesClient } from './resources/Bounties'
 import { Request  } from './utils/request'
 
 import { HumanStandardToken } from './contracts/types/HumanStandardToken'
@@ -16,9 +16,10 @@ class Bounties {
     _factoryAddress: string
     _endpoint: string
     _metadata: Metadata
- 
+
     request: Request
-    bounty: BountyClient
+    bounties: BountiesClient
+
 
     constructor(web3: Web3, ipfs: any, factoryAddress: string, metadata: Metadata) {
         if (!(web3 instanceof Web3)) {
@@ -36,7 +37,7 @@ class Bounties {
         this._metadata = metadata
 
         this.request = new Request(this._endpoint)
-        this.bounty = new BountyClient(this)
+        this.bounties = new BountiesClient(this)
 
         this.tokenClient = this.tokenClient.bind(this)
     }
@@ -57,5 +58,5 @@ class Bounties {
         return new this._web3.eth.Contract(interfaces.HumanStandardToken, address) as HumanStandardToken
     }
 }
-  
+
 export default Bounties

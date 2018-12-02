@@ -175,6 +175,7 @@ describe('bounty module', () => {
             })
         })
 
+
         describe('drain', () => {
             it('should drain a bounty', async () => {
                 provider.injectValidation(payload => {
@@ -194,7 +195,7 @@ describe('bounty module', () => {
                     expect(payload.params).toEqual([buildTxHash(0)])
                 })
 
-                await expect(bounties.bounty.drain(
+                await expect(bounties.bounties.drain(
                     BOUNTY_ADDRESS,
                     [buildAddress(0), buildAddress(1)],
                     [new BigNumber(20), new BigNumber(20)],
@@ -202,6 +203,7 @@ describe('bounty module', () => {
                 )).resolves.toBe(buildTxHash(0))
             })
         })
+
 
         describe('change', () => {
             it('should change a bounty', async () => {
@@ -221,7 +223,7 @@ describe('bounty module', () => {
                     expect(payload.method).toEqual('eth_getTransactionReceipt')
                 })
 
-                await expect(bounties.bounty.change(
+                await expect(bounties.bounties.change(
                     BOUNTY_ADDRESS,
                     USER_ADDRESS,
                     [buildAddress(0), buildAddress(1), buildAddress(2)],
@@ -249,7 +251,7 @@ describe('bounty module', () => {
                     expect(payload.method).toEqual('eth_getTransactionReceipt')
                 })
 
-                await expect(bounties.bounty.changeController(
+                await expect(bounties.bounties.changeController(
                     BOUNTY_ADDRESS,
                     buildAddress(0)
                 )).resolves.toBe(buildTxHash(0))
@@ -274,7 +276,7 @@ describe('bounty module', () => {
                     expect(payload.method).toEqual('eth_getTransactionReceipt')
                 })
 
-                await expect(bounties.bounty.changeApprover(
+                await expect(bounties.bounties.changeApprover(
                     BOUNTY_ADDRESS,
                     1,
                     buildAddress(0)
@@ -300,7 +302,7 @@ describe('bounty module', () => {
                     expect(payload.method).toEqual('eth_getTransactionReceipt')
                 })
 
-                await expect(bounties.bounty.changeData(
+                await expect(bounties.bounties.changeData(
                     BOUNTY_ADDRESS,
                     IPFS_HASH
                 )).resolves.toBe(buildTxHash(0))
@@ -325,13 +327,11 @@ describe('bounty module', () => {
                     expect(payload.method).toEqual('eth_getTransactionReceipt')
                 })
 
-                await expect(bounties.bounty.changeDeadline(
+                await expect(bounties.bounties.changeDeadline(
                     BOUNTY_ADDRESS,
                     new BigNumber(new Date(2100, 9, 29).getTime() / 1000)
                 )).resolves.toBe(buildTxHash(0))
             })
         })
-
     })
-
 })

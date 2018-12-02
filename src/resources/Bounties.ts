@@ -6,7 +6,7 @@ import Bounties from '../bounties';
 import { rejects } from 'assert';
 
 
-export class BountyClient {
+export class BountiesClient {
     bounties: Bounties
     request: Request
 
