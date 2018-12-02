@@ -18,7 +18,7 @@ declare enum Difficulty {
     advanced = 'Advanced'
 }
 
-interface BountyData {
+interface BountySchema {
     title: string,
     body: string,
     categories: string[],

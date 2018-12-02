@@ -31,7 +31,6 @@ const GAS = '0x9c40'
 const GAS_PRICE = '0x5'
 const IPFS_HASH = 'QmP8QJoTxvxnFm3WSsdG3SdVDSvktJkcmrQ7PmY3Q2D7RX'
 
-
 // web3
 const web3 = new Web3(new Web3.providers.HttpProvider('https://rinkeby.infura.io'))
 
@@ -56,33 +55,33 @@ describe('bounty module', () => {
         describe('load', () => {
             it('should load bounty with specified id', async () => {
                 nock.get('/bounty/1/').reply(200, fixtures.bounty)
-        
+
                 const bounty = await bounties.bounty.load((1))
                 expect(bounty).toEqual(fixtures.bounty)
             })
-        
+
             it('should load bounty with corrent parameters', async () => {
                 const params = { platform__in: 'bounties' }
                 nock.get('/bounty/1/').query(params).reply(200, fixtures.bounty)
-        
+
                 const bounty = await bounties.bounty.load(1, params)
                 expect(bounty).toEqual(fixtures.bounty)
             })
-        
+
             it('should fail if id does not exist', async () => {
                 nock.get('/bounty/1234/').reply(400, fixtures.bounty);
                 await expect(bounties.bounty.load(1)).rejects.toThrow(new Error('404'))
             })
         })
     })
-   
-    
-    
+
+
+
     describe('create', () => {
         it('should generate correct payload', () => {
             const mockedDate = new Date(1998, 9, 29)
             global.Date = jest.fn(() => mockedDate)
-            
+
             const payload = bounties.bounty.generatePayload(fixtures.rawBountyPayload)
             expect(payload).toEqual(fixtures.bountyPayload)
         })
@@ -147,7 +146,7 @@ describe('bounty module', () => {
                 }])
             })
 
-            provider.injectResult(null)            
+            provider.injectResult(null)
 
             const txHash = '0x5550000000000000000000000000000000000000000000000000000000000002'
             provider.injectResult(txHash)
@@ -156,7 +155,7 @@ describe('bounty module', () => {
                 expect(payload.params).toEqual([txHash])
             })
 
-            await expect(bounties.bounty.create(fixtures.rawBountyPayloadPaysTokens, 5)).resolves.toBe(txHash) 
+            await expect(bounties.bounty.create(fixtures.rawBountyPayloadPaysTokens, 5)).resolves.toBe(txHash)
         })
     })
     */
@@ -188,35 +187,35 @@ describe('bounty module', () => {
                         gasPrice: GAS_PRICE
                     }])
                 })
-    
+
                 provider.injectResult(buildTxHash(0))
                 provider.injectValidation(payload => {
                     expect(payload.method).toEqual('eth_getTransactionReceipt')
                     expect(payload.params).toEqual([buildTxHash(0)])
                 })
-    
+
                 await expect(bounties.bounty.drain(
-                    BOUNTY_ADDRESS, 
-                    [buildAddress(0), buildAddress(1)], 
-                    [20, 20],
+                    BOUNTY_ADDRESS,
+                    [buildAddress(0), buildAddress(1)],
+                    [new BigNumber(20), new BigNumber(20)],
                     [new BigNumber(10), new BigNumber(200)]
                 )).resolves.toBe(buildTxHash(0))
             })
         })
-    
+
         describe('change', () => {
             it('should change a bounty', async () => {
                 provider.injectValidation(payload => {
                     expect(payload.method).toEqual('eth_sendTransaction')
                     expect(payload.params).toEqual([{
-                        data: '0x16793672000000000000000000000000add32550000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000f61370d00000000000000000000000000000000000000000000000000000000000000003000000000000000000000000add3255000000000000000000000000000000000000000000000000000000000add3255000000000000000000000000000000001000000000000000000000000add3255000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000002e516d5038514a6f547876786e466d335753736447335364564453766b744a6b636d725137506d5933513244375258000000000000000000000000000000000000',
+                        data: '0x16793672000000000000000000000000add32550000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000f6138cf00000000000000000000000000000000000000000000000000000000000000003000000000000000000000000add3255000000000000000000000000000000000000000000000000000000000add3255000000000000000000000000000000001000000000000000000000000add3255000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000002e516d5038514a6f547876786e466d335753736447335364564453766b744a6b636d725137506d5933513244375258000000000000000000000000000000000000',
                         from: USER_ADDRESS.toLowerCase(),
                         to: BOUNTY_ADDRESS.toLowerCase(),
                         gas: GAS,
                         gasPrice: GAS_PRICE
                     }])
                 })
-    
+
                 provider.injectResult(buildTxHash(0))
                 provider.injectValidation(payload => {
                     expect(payload.method).toEqual('eth_getTransactionReceipt')
@@ -244,7 +243,7 @@ describe('bounty module', () => {
                         gasPrice: GAS_PRICE
                     }])
                 })
-    
+
                 provider.injectResult(buildTxHash(0))
                 provider.injectValidation(payload => {
                     expect(payload.method).toEqual('eth_getTransactionReceipt')
@@ -269,7 +268,7 @@ describe('bounty module', () => {
                         gasPrice: GAS_PRICE
                     }])
                 })
-    
+
                 provider.injectResult(buildTxHash(0))
                 provider.injectValidation(payload => {
                     expect(payload.method).toEqual('eth_getTransactionReceipt')
@@ -295,7 +294,7 @@ describe('bounty module', () => {
                         gasPrice: GAS_PRICE
                     }])
                 })
-    
+
                 provider.injectResult(buildTxHash(0))
                 provider.injectValidation(payload => {
                     expect(payload.method).toEqual('eth_getTransactionReceipt')
@@ -313,14 +312,14 @@ describe('bounty module', () => {
                 provider.injectValidation(payload => {
                     expect(payload.method).toEqual('eth_sendTransaction')
                     expect(payload.params).toEqual([{
-                        data: '0x7aca97b500000000000000000000000000000000000000000000000000000000f61370d0',
+                        data: '0x7aca97b500000000000000000000000000000000000000000000000000000000f6138cf0',
                         from: USER_ADDRESS.toLowerCase(),
                         to: BOUNTY_ADDRESS.toLowerCase(),
                         gas: GAS,
                         gasPrice: GAS_PRICE
                     }])
                 })
-    
+
                 provider.injectResult(buildTxHash(0))
                 provider.injectValidation(payload => {
                     expect(payload.method).toEqual('eth_getTransactionReceipt')
@@ -332,7 +331,7 @@ describe('bounty module', () => {
                 )).resolves.toBe(buildTxHash(0))
             })
         })
-        
+
     })
-    
+
 })

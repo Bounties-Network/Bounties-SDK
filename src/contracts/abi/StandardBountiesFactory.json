@@ -68,8 +68,8 @@
                 "type": "address"
             },
             {
-                "name": "_arbiter",
-                "type": "address"
+                "name": "_approvers",
+                "type": "address[]"
             },
             {
                 "name": "_data",
