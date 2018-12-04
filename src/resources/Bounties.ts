@@ -1,9 +1,10 @@
 import { Request } from '../utils/request'
 // import { calculateDecimals } from '../utils/helpers'
-import { map } from 'lodash'
+import { map, size, isArray } from 'lodash'
 import { BigNumber } from 'bignumber.js'
 import Bounties from '../bounties';
 import { rejects } from 'assert';
+import { MutableBountyData, BountyData } from '../types';
 
 
 export class BountiesClient {
@@ -20,7 +21,7 @@ export class BountiesClient {
     }
 
     create(
-        bountyValues: BountySchema,
+        bountyValues: BountyData,
         controller: string,
         approvers: string[],
         deadline: BigNumber,
@@ -113,25 +114,69 @@ export class BountiesClient {
         })
     }
 
-    change(
+    update(
         bountyAddress: string,
-        controller: string,
-        approvers: string[],
-        data: string,
-        deadline: BigNumber,
+        values: MutableBountyData,
         gasPrice: BigNumber = new BigNumber(5)
     ): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
+                if (size(values) == 1) {
+                    if (values.controller) {
+                        return this._changeController(
+                            bountyAddress,
+                            values.controller,
+                            gasPrice
+                        )
+                            .then(hash => resolve(hash))
+                            .catch(e => reject(e))
+                    }
+
+                    if (values.data) {
+                        const ipfsHash: string = await this.bounties._ipfs.addJSON(values.data)
+                        return this._changeData(
+                            bountyAddress,
+                            ipfsHash,
+                            gasPrice
+                        )
+                            .then(hash => resolve(hash))
+                            .catch(e => reject(e))
+
+                    }
+
+                    if (values.deadline) {
+                        return this._changeDeadline(
+                            bountyAddress,
+                            values.deadline,
+                            gasPrice
+                        )
+                            .then(hash => resolve(hash))
+                            .catch(e => reject(e))
+                    }
+                }
+
                 const bountyClient = this.bounties.bountyClient(bountyAddress)
+                const from = (await this.bounties._web3.eth.getAccounts())[0]
+
+                const {
+                    0: controller,
+                    4: approvers,
+                    5: deadline,
+                } = await bountyClient.methods.getBounty().call()
+
+                let ipfsHash
+                if (values.data) {
+                    ipfsHash = await this.bounties._ipfs.addJSON(values.data)
+                }
+
                 bountyClient.methods.changeBounty(
-                    controller,
-                    approvers,
-                    data,
-                    deadline.toString()
+                    values.controller || controller,
+                    values.approvers || approvers,
+                    ipfsHash || 'hello',
+                    (values.deadline ? values.deadline.toString() : false) || deadline
                 )
                     .send({
-                        from: (await this.bounties._web3.eth.getAccounts())[0],
+                        from,
                         to: bountyClient._address,
                         gas: 40000,
                         gasPrice: gasPrice.toString()
@@ -144,7 +189,7 @@ export class BountiesClient {
         })
     }
 
-    changeController(
+    _changeController(
         bountyAddress: string,
         controller: string,
         gasPrice: BigNumber = new BigNumber(5)
@@ -170,9 +215,9 @@ export class BountiesClient {
         })
     }
 
-    changeApprover(
+    _changeApprover(
         bountyAddress: string,
-        approverId: number,
+        approverId: BigNumber,
         newApproverAddress: string,
         gasPrice: BigNumber = new BigNumber(5)
     ): Promise<string> {
@@ -181,7 +226,7 @@ export class BountiesClient {
                 const bountyClient = this.bounties.bountyClient(bountyAddress)
 
                 bountyClient.methods.changeApprover(
-                    approverId,
+                    approverId.toString(),
                     newApproverAddress
                 )
                     .send({
@@ -198,7 +243,7 @@ export class BountiesClient {
         })
     }
 
-    changeData(
+    _changeData(
         bountyAddress: string,
         data: string,
         gasPrice: BigNumber = new BigNumber(5)
@@ -224,7 +269,7 @@ export class BountiesClient {
         })
     }
 
-    changeDeadline(
+    _changeDeadline(
         bountyAddress: string,
         deadline: BigNumber,
         gasPrice: BigNumber = new BigNumber(5)

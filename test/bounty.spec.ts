@@ -1,12 +1,19 @@
 import Nock from 'nock'
 import Web3 from 'web3'
 import ipfsMini from 'ipfs-mini'
+import { map, findIndex } from 'lodash';
 
 import { FakeHttpProvider } from './helpers/fakeHttpProvider'
 import fixtures from './fixtures'
 import Bounties from '../src/bounties'
 import BigNumber from 'bignumber.js';
 import { Provider } from 'web3/providers';
+import { fileURLToPath } from 'url';
+import { Difficulty, BountyData } from '../src/types';
+
+import { interfaces } from '../src/contracts/interfaces'
+
+
 
 const buildTxHash = (hashId: number) => {
     let hash = '0x7000000000000000000000000000000000000000000000000000000000000000'.slice(
@@ -30,12 +37,40 @@ const BOUNTY_ADDRESS = buildAddress(300)
 const GAS = '0x9c40'
 const GAS_PRICE = '0x5'
 const IPFS_HASH = 'QmP8QJoTxvxnFm3WSsdG3SdVDSvktJkcmrQ7PmY3Q2D7RX'
+const TX_OPTIONS = {
+    from: USER_ADDRESS.toLowerCase(),
+    to: BOUNTY_ADDRESS.toLowerCase(),
+    gas: GAS,
+    gasPrice: GAS_PRICE
+}
+const BOUNTY_DATA = {
+    title: 'Bounty Title',
+    body: 'Bounty body!!',
+    categories: ['javascript', 'research'],
+    expectedNumberOfRevisions: 1,
+    hasPrivateFulfillments: true,
+    difficulty: 'Beginner' as Difficulty,
+    attachments: {
+        ipfsHash: IPFS_HASH,
+        ipfsFileName: 'pic.jpg',
+        url: 'https://bounties.network',
+    },
+    metadata: {
+        platform: 'bounties',
+        schemaVersion: 0.2,
+        schemaName: 'standard'
+    }
+}
 
 // web3
 const web3 = new Web3(new Web3.providers.HttpProvider('https://rinkeby.infura.io'))
+// incorrect web3 types
+const encodeParameter = (type: string | object, parameter: any) => (web3.eth.abi.encodeParameter as Function)(type, parameter).replace('0x', '')
+const encodeParameters = (types: string[], parameters: any[]) => web3.eth.abi.encodeParameters(types, parameters)
+const methodSignature = (method: string) => interfaces.StandardBounty[findIndex(interfaces.StandardBounty, item => item.name == method)].signature.replace('0x', '')
 
 // mock ipfs
-ipfsMini.prototype.addJSON = (data: object, callback: Function ) => callback(null, fixtures.rawBountyPayload.ipfsHash)
+ipfsMini.prototype.addJSON = (data: object, callback: Function ) => callback(null, 'QmP8QJoTxvxnFm3WSsdG3SdVDSvktJkcmrQ7PmY3Q2D7RX')
 const ipfs = new ipfsMini({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' })
 
 // mock http
@@ -48,15 +83,15 @@ const metadata = {
     schemaName: 'standard'
 }
 const bounties = new Bounties(web3, ipfs, FACTORY_ADDRESS, metadata)
+const bountyContract = bounties.bountyClient(BOUNTY_ADDRESS).methods
 
 describe('bounty module', () => {
-    describe('offchain', () => {
-        /*
+    describe.skip('offchain', () => {
         describe('load', () => {
             it('should load bounty with specified id', async () => {
                 nock.get('/bounty/1/').reply(200, fixtures.bounty)
 
-                const bounty = await bounties.bounty.load((1))
+                const bounty = await bounties.bounties.load((1))
                 expect(bounty).toEqual(fixtures.bounty)
             })
 
@@ -64,101 +99,15 @@ describe('bounty module', () => {
                 const params = { platform__in: 'bounties' }
                 nock.get('/bounty/1/').query(params).reply(200, fixtures.bounty)
 
-                const bounty = await bounties.bounty.load(1, params)
+                const bounty = await bounties.bounties.load(1, params)
                 expect(bounty).toEqual(fixtures.bounty)
             })
 
             it('should fail if id does not exist', async () => {
                 nock.get('/bounty/1234/').reply(400, fixtures.bounty);
-                await expect(bounties.bounty.load(1)).rejects.toThrow(new Error('404'))
+                await expect(bounties.bounties.load(1)).rejects.toThrow(new Error('404'))
             })
         })
-    })
-
-
-
-    describe('create', () => {
-        it('should generate correct payload', () => {
-            const mockedDate = new Date(1998, 9, 29)
-            global.Date = jest.fn(() => mockedDate)
-
-            const payload = bounties.bounty.generatePayload(fixtures.rawBountyPayload)
-            expect(payload).toEqual(fixtures.bountyPayload)
-        })
-
-        it('should create bounty that pays out in ether', async () => {
-            const provider = new FakeHttpProvider()
-            bounties._web3.setProvider(provider)
-
-            provider.injectValidation(function (payload) {
-                expect(payload.method).toEqual('eth_sendTransaction')
-                expect(payload.params).toEqual([{
-                    data: '0x7e9e511d000000000000000000000000e23f91725c6c18204743592f963688b8b8dc2ced000000000000000000000000000000000000000000000000000000005bfadcf000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000008ac7230489e80000000000000000000000000000000000000000000000000000000000000000dead000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008ac7230489e80000000000000000000000000000000000000000000000000000000000000000002e516d5038514a6f547876786e466d335753736447335364564453766b744a6b636d725137506d5933513244375258000000000000000000000000000000000000' ,
-                    from: '0xe23f91725c6c18204743592f963688b8b8dc2ced',
-                    to: '0x2af47a65da8cd66729b4209c22017d6a5c2d2400',
-                    gas: '0x9c40',
-                    gasPrice: '0x5',
-                    value: '0x8ac7230489e80000'
-                }])
-            })
-
-            const txHash = '0x5550000000000000000000000000000000000000000000000000000000000001'
-            provider.injectResult(txHash)
-
-            provider.injectValidation(function (payload) {
-                expect(payload.method).toEqual('eth_getTransactionReceipt')
-                expect(payload.params).toEqual([txHash])
-            })
-
-            await expect(bounties.bounty.create(fixtures.rawBountyPayload, 5)).resolves.toBe(txHash)
-        })
-
-        it('should create bounty that pays out in tokens', async () => {
-            const provider = new FakeHttpProvider()
-            bounties._web3.setProvider(provider)
-
-            provider.injectValidation(function (payload) {
-                expect(payload.method).toEqual('eth_sendTransaction')
-                expect(payload.params).toEqual([{
-                    data: '0x095ea7b30000000000000000000000002af47a65da8cd66729b4209c22017d6a5c2d24000000000000000000000000000000000000000000000000008ac7230489e80000',
-                    from: '0xe23f91725c6c18204743592f963688b8b8dc2ced',
-                    to: '0xb8c77482e45f1f44de1745f52c74426c631bdd52',
-                    gasPrice: '0x5',
-                    gas: "0x9c40"
-                }])
-            })
-
-            provider.injectResult('0x5550000000000000000000000000000000000000000000000000000000000001')
-            provider.injectValidation(function (payload) {
-                expect(payload.method).toEqual('eth_getTransactionReceipt')
-                expect(payload.params).toEqual(['0x5550000000000000000000000000000000000000000000000000000000000001'])
-            })
-
-            provider.injectValidation(function (payload) {
-                expect(payload.method).toEqual('eth_sendTransaction')
-                expect(payload.params).toEqual([{
-                    data: '0x7e9e511d000000000000000000000000e23f91725c6c18204743592f963688b8b8dc2ced000000000000000000000000000000000000000000000000000000005bfadcf000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000008ac7230489e80000000000000000000000000000000000000000000000000000000000000000dead0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000b8c77482e45f1f44de1745f52c74426c631bdd520000000000000000000000000000000000000000000000008ac7230489e80000000000000000000000000000000000000000000000000000000000000000002e516d5038514a6f547876786e466d335753736447335364564453766b744a6b636d725137506d5933513244375258000000000000000000000000000000000000',
-                    from: '0xe23f91725c6c18204743592f963688b8b8dc2ced',
-                    to: '0x2af47a65da8cd66729b4209c22017d6a5c2d2400',
-                    gas: '0x9c40',
-                    gasPrice: '0x5',
-                    value: '0x0'
-                }])
-            })
-
-            provider.injectResult(null)
-
-            const txHash = '0x5550000000000000000000000000000000000000000000000000000000000002'
-            provider.injectResult(txHash)
-            provider.injectValidation(function (payload) {
-                expect(payload.method).toEqual('eth_getTransactionReceipt')
-                expect(payload.params).toEqual([txHash])
-            })
-
-            await expect(bounties.bounty.create(fixtures.rawBountyPayloadPaysTokens, 5)).resolves.toBe(txHash)
-        })
-    })
-    */
     })
 
     describe('onchain', () => {
@@ -168,24 +117,279 @@ describe('bounty module', () => {
             provider = new FakeHttpProvider()
             bounties._web3.setProvider(provider)
 
-            // inject result for web3.eth.getAccounts() calls & validate the call occured
+            // inject result for web3.eth.getAccounts() calls
             provider.injectResult([USER_ADDRESS])
             provider.injectValidation(payload => {
                 expect(payload.method).toEqual('eth_accounts')
             })
         })
 
+        describe('create', () => {
+            it('should create bounty that pays out in ether', async () => { })
+            it('should create bounty that pays out in tokens', async () => { })
+        })
+
+        describe('update', () => {
+            const intitialBounty = {
+                controller: buildAddress(0),
+                hasPaidOut: false,
+                fulfillmentsLength: 0,
+                masterCopy: FACTORY_ADDRESS,
+                data: {
+                    object: BOUNTY_DATA,
+                    hash: IPFS_HASH
+                },
+                approvers: [buildAddress(1)],
+                deadline: Date.UTC(1970, 0, 1),
+            }
+
+            const updatedBounty = {
+                controller: USER_ADDRESS,
+                approvers: [buildAddress(0), buildAddress(1), buildAddress(2)],
+                data: {
+                    object: BOUNTY_DATA,
+                    hash: IPFS_HASH
+                },
+                deadline: new BigNumber(new Date(2100, 9, 29).getTime() / 1000)
+            }
+
+            describe('changeBounty', () => {
+                beforeEach(() => {
+                    provider.injectValidation(payload => {
+                        expect(payload.method).toEqual('eth_call')
+                    })
+
+                    // inject result for bounty.methods.getBounty().call()
+                    provider.injectResult(
+                        encodeParameters(
+                            [
+                                'address',
+                                'bool',
+                                'uint',
+                                'address',
+                                'address[]',
+                                'uint'],
+                            [
+                                intitialBounty.controller,
+                                intitialBounty.hasPaidOut,
+                                intitialBounty.fulfillmentsLength,
+                                intitialBounty.masterCopy,
+                                intitialBounty.approvers,
+                                intitialBounty.deadline
+                            ]
+                        )
+                    )
+                })
+
+
+                it('should update all bounty values', async () => {
+                    provider.injectValidation(payload => {
+                        expect(payload.method).toEqual('eth_sendTransaction')
+                        expect(payload.params).toEqual([{
+                            data: bountyContract.changeBounty(
+                            updatedBounty.controller,
+                            updatedBounty.approvers,
+                            updatedBounty.data.hash,
+                            updatedBounty.deadline.toString()
+                            ).encodeABI(),
+                            ...TX_OPTIONS
+                        }])
+                    })
+
+                    provider.injectResult(buildTxHash(0))
+                    provider.injectValidation(payload => {
+                        expect(payload.method).toEqual('eth_getTransactionReceipt')
+                    })
+
+                    await expect(bounties.bounties.update(
+                        BOUNTY_ADDRESS,
+                        {
+                            controller: updatedBounty.controller,
+                            approvers: updatedBounty.approvers,
+                            data: updatedBounty.data.object,
+                            deadline: updatedBounty.deadline
+                        }
+                    )).resolves.toBe(buildTxHash(0))
+                })
+
+
+                it('should update bounty except for controller', async () => {
+                    provider.injectValidation(payload => {
+                        expect(payload.method).toEqual('eth_sendTransaction')
+                        expect(payload.params).toEqual([{
+                            data: bountyContract.changeBounty(
+                                intitialBounty.controller,
+                                updatedBounty.approvers,
+                                updatedBounty.data.hash,
+                                updatedBounty.deadline.toString()
+                            ).encodeABI(),
+                            ...TX_OPTIONS
+                        }])
+                    })
+
+                    provider.injectResult(buildTxHash(0))
+                    provider.injectValidation(payload => {
+                        expect(payload.method).toEqual('eth_getTransactionReceipt')
+                    })
+
+
+                    await expect(bounties.bounties.update(
+                        BOUNTY_ADDRESS,
+                        {
+                            approvers: updatedBounty.approvers,
+                            data: updatedBounty.data.object,
+                            deadline: updatedBounty.deadline
+                        }
+                    )).resolves.toBe(buildTxHash(0))
+                })
+
+                it('should update bounty except for approvers and deadline', async () => {
+                    provider.injectValidation(payload => {
+                        expect(payload.method).toEqual('eth_sendTransaction')
+                        expect(payload.params).toEqual([{
+                            data: bountyContract.changeBounty(
+                                updatedBounty.controller,
+                                intitialBounty.approvers,
+                                updatedBounty.data.hash,
+                                intitialBounty.deadline.toString(),
+                            ).encodeABI(),
+                            ...TX_OPTIONS
+                        }])
+                    })
+
+                    provider.injectResult(buildTxHash(0))
+                    provider.injectValidation(payload => {
+                        expect(payload.method).toEqual('eth_getTransactionReceipt')
+                    })
+
+
+                    await expect(bounties.bounties.update(
+                        BOUNTY_ADDRESS,
+                        {
+                            controller: updatedBounty.controller,
+                            data: updatedBounty.data.object,
+                        }
+                    )).resolves.toBe(buildTxHash(0))
+                })
+
+                // needs data to be returnd from getBounty()
+                it.skip('should change the approvers', async () => {
+                    provider.injectValidation(payload => {
+                        expect(payload.method).toEqual('eth_sendTransaction')
+                        expect(payload.params).toEqual([{
+                            data: bountyContract.changeBounty(
+                                intitialBounty.controller,
+                                updatedBounty.approvers,
+                                intitialBounty.data.hash,
+                                intitialBounty.deadline.toString(),
+                            ).encodeABI(),
+                            ...TX_OPTIONS
+                        }])
+                    })
+
+                    provider.injectResult(buildTxHash(0))
+                    provider.injectValidation(payload => {
+                        expect(payload.method).toEqual('eth_getTransactionReceipt')
+                    })
+
+
+                    await expect(bounties.bounties.update(
+                        BOUNTY_ADDRESS,
+                        {
+                            approvers: updatedBounty.approvers,
+                        }
+                    )).resolves.toBe(buildTxHash(0))
+                })
+            })
+
+            describe('changeController', async () => {
+                it('should change the controller', async () => {
+                    provider.injectValidation(payload => {
+                        expect(payload.method).toEqual('eth_sendTransaction')
+                        expect(payload.params).toEqual([{
+                            data: bountyContract.changeController(
+                                updatedBounty.controller
+                            ).encodeABI(),
+                            ...TX_OPTIONS
+                        }])
+                    })
+
+                    provider.injectResult(buildTxHash(0))
+                    provider.injectValidation(payload => {
+                        expect(payload.method).toEqual('eth_getTransactionReceipt')
+                    })
+
+                    await expect(bounties.bounties.update(
+                        BOUNTY_ADDRESS,
+                        { controller: updatedBounty.controller }
+                    )).resolves.toBe(buildTxHash(0))
+                })
+            })
+
+            describe('changeData', async () => {
+                it('should change the data associated with the bounty', async () => {
+                    provider.injectValidation(payload => {
+                        expect(payload.method).toEqual('eth_sendTransaction')
+                        expect(payload.params).toEqual([{
+                            data: bountyContract.changeData(
+                                updatedBounty.data.hash
+                            ).encodeABI(),
+                            ...TX_OPTIONS
+                        }])
+                    })
+
+                    provider.injectResult(buildTxHash(0))
+                    provider.injectValidation(payload => {
+                        expect(payload.method).toEqual('eth_getTransactionReceipt')
+                    })
+
+                    await expect(bounties.bounties.update(
+                        BOUNTY_ADDRESS,
+                        { data: updatedBounty.data.object }
+                    )).resolves.toBe(buildTxHash(0))
+                })
+            })
+
+            describe('changeDeadline', async () => {
+                it('should change the data associated with the bounty', async () => {
+                    provider.injectValidation(payload => {
+                        expect(payload.method).toEqual('eth_sendTransaction')
+                        expect(payload.params).toEqual([{
+                            data: bountyContract.changeDeadline(
+                                updatedBounty.deadline.toString()
+                            ).encodeABI(),
+                            ...TX_OPTIONS
+                        }])
+                    })
+
+                    provider.injectResult(buildTxHash(0))
+                    provider.injectValidation(payload => {
+                        expect(payload.method).toEqual('eth_getTransactionReceipt')
+                    })
+
+                    await expect(bounties.bounties.update(
+                        BOUNTY_ADDRESS,
+                        { deadline: updatedBounty.deadline }
+                    )).resolves.toBe(buildTxHash(0))
+                })
+            })
+        })
 
         describe('drain', () => {
+            const payoutTokens = [buildAddress(0), buildAddress(1)]
+            const tokenVersions = [new BigNumber(20), new BigNumber(20)]
+            const tokenAmounts = [new BigNumber(10), new BigNumber(200)]
+
             it('should drain a bounty', async () => {
                 provider.injectValidation(payload => {
                     expect(payload.method).toEqual('eth_sendTransaction')
                     expect(payload.params).toEqual([{
-                        data: '0x0f95c22c000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000001200000000000000000000000000000000000000000000000000000000000000002000000000000000000000000add3255000000000000000000000000000000000000000000000000000000000add32550000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000001400000000000000000000000000000000000000000000000000000000000000140000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000c8',
-                        from: USER_ADDRESS.toLowerCase(),
-                        to: BOUNTY_ADDRESS.toLowerCase(),
-                        gas: GAS,
-                        gasPrice: GAS_PRICE
+                        data: bountyContract.drainBounty(
+                            payoutTokens,
+                            map(tokenVersions, version => version.toString()),
+                            map(tokenAmounts, amounts => amounts.toString())
+                        ).encodeABI(),
+                        ...TX_OPTIONS
                     }])
                 })
 
@@ -197,139 +401,9 @@ describe('bounty module', () => {
 
                 await expect(bounties.bounties.drain(
                     BOUNTY_ADDRESS,
-                    [buildAddress(0), buildAddress(1)],
-                    [new BigNumber(20), new BigNumber(20)],
-                    [new BigNumber(10), new BigNumber(200)]
-                )).resolves.toBe(buildTxHash(0))
-            })
-        })
-
-
-        describe('change', () => {
-            it('should change a bounty', async () => {
-                provider.injectValidation(payload => {
-                    expect(payload.method).toEqual('eth_sendTransaction')
-                    expect(payload.params).toEqual([{
-                        data: '0x16793672000000000000000000000000add32550000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000f6138cf00000000000000000000000000000000000000000000000000000000000000003000000000000000000000000add3255000000000000000000000000000000000000000000000000000000000add3255000000000000000000000000000000001000000000000000000000000add3255000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000002e516d5038514a6f547876786e466d335753736447335364564453766b744a6b636d725137506d5933513244375258000000000000000000000000000000000000',
-                        from: USER_ADDRESS.toLowerCase(),
-                        to: BOUNTY_ADDRESS.toLowerCase(),
-                        gas: GAS,
-                        gasPrice: GAS_PRICE
-                    }])
-                })
-
-                provider.injectResult(buildTxHash(0))
-                provider.injectValidation(payload => {
-                    expect(payload.method).toEqual('eth_getTransactionReceipt')
-                })
-
-                await expect(bounties.bounties.change(
-                    BOUNTY_ADDRESS,
-                    USER_ADDRESS,
-                    [buildAddress(0), buildAddress(1), buildAddress(2)],
-                    IPFS_HASH,
-                    new BigNumber(new Date(2100, 9, 29).getTime() / 1000)
-                )).resolves.toBe(buildTxHash(0))
-            })
-        })
-
-        describe('changeController', async () => {
-            it('should change the controller', async () => {
-                provider.injectValidation(payload => {
-                    expect(payload.method).toEqual('eth_sendTransaction')
-                    expect(payload.params).toEqual([{
-                        data: '0x3cebb823000000000000000000000000add3255000000000000000000000000000000000',
-                        from: USER_ADDRESS.toLowerCase(),
-                        to: BOUNTY_ADDRESS.toLowerCase(),
-                        gas: GAS,
-                        gasPrice: GAS_PRICE
-                    }])
-                })
-
-                provider.injectResult(buildTxHash(0))
-                provider.injectValidation(payload => {
-                    expect(payload.method).toEqual('eth_getTransactionReceipt')
-                })
-
-                await expect(bounties.bounties.changeController(
-                    BOUNTY_ADDRESS,
-                    buildAddress(0)
-                )).resolves.toBe(buildTxHash(0))
-            })
-        })
-
-        describe('changeApprover', async () => {
-            it('should change the approver', async () => {
-                provider.injectValidation(payload => {
-                    expect(payload.method).toEqual('eth_sendTransaction')
-                    expect(payload.params).toEqual([{
-                        data: '0xe9be41660000000000000000000000000000000000000000000000000000000000000001000000000000000000000000add3255000000000000000000000000000000000',
-                        from: USER_ADDRESS.toLowerCase(),
-                        to: BOUNTY_ADDRESS.toLowerCase(),
-                        gas: GAS,
-                        gasPrice: GAS_PRICE
-                    }])
-                })
-
-                provider.injectResult(buildTxHash(0))
-                provider.injectValidation(payload => {
-                    expect(payload.method).toEqual('eth_getTransactionReceipt')
-                })
-
-                await expect(bounties.bounties.changeApprover(
-                    BOUNTY_ADDRESS,
-                    1,
-                    buildAddress(0)
-                )).resolves.toBe(buildTxHash(0))
-            })
-        })
-
-        describe('changeData', async () => {
-            it('should change the data associated with the bounty', async () => {
-                provider.injectValidation(payload => {
-                    expect(payload.method).toEqual('eth_sendTransaction')
-                    expect(payload.params).toEqual([{
-                        data: '0x2a0fccd50000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002e516d5038514a6f547876786e466d335753736447335364564453766b744a6b636d725137506d5933513244375258000000000000000000000000000000000000',
-                        from: USER_ADDRESS.toLowerCase(),
-                        to: BOUNTY_ADDRESS.toLowerCase(),
-                        gas: GAS,
-                        gasPrice: GAS_PRICE
-                    }])
-                })
-
-                provider.injectResult(buildTxHash(0))
-                provider.injectValidation(payload => {
-                    expect(payload.method).toEqual('eth_getTransactionReceipt')
-                })
-
-                await expect(bounties.bounties.changeData(
-                    BOUNTY_ADDRESS,
-                    IPFS_HASH
-                )).resolves.toBe(buildTxHash(0))
-            })
-        })
-
-        describe('changeDeadline', async () => {
-            it('should change the deadline', async () => {
-                provider.injectValidation(payload => {
-                    expect(payload.method).toEqual('eth_sendTransaction')
-                    expect(payload.params).toEqual([{
-                        data: '0x7aca97b500000000000000000000000000000000000000000000000000000000f6138cf0',
-                        from: USER_ADDRESS.toLowerCase(),
-                        to: BOUNTY_ADDRESS.toLowerCase(),
-                        gas: GAS,
-                        gasPrice: GAS_PRICE
-                    }])
-                })
-
-                provider.injectResult(buildTxHash(0))
-                provider.injectValidation(payload => {
-                    expect(payload.method).toEqual('eth_getTransactionReceipt')
-                })
-
-                await expect(bounties.bounties.changeDeadline(
-                    BOUNTY_ADDRESS,
-                    new BigNumber(new Date(2100, 9, 29).getTime() / 1000)
+                    payoutTokens,
+                    tokenVersions,
+                    tokenAmounts,
                 )).resolves.toBe(buildTxHash(0))
             })
         })

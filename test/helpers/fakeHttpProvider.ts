@@ -46,7 +46,7 @@ export class FakeHttpProvider implements Provider {
         expect(isArray(payload) || isObject(payload)).toEqual(true);
         expect(isFunction(callback)).toEqual(true);
 
-        console.log(payload)
+        // console.log(payload)
 
         var validation = this.validation.shift();
 

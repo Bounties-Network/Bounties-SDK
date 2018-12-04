@@ -1,7 +1,7 @@
-declare module 'ipfs-mini'
+import BigNumber from "bignumber.js";
 
 interface Metadata {
-    platform: string 
+    platform: string
     schemaVersion: number
     schemaName: string
 }
@@ -18,7 +18,7 @@ declare enum Difficulty {
     advanced = 'Advanced'
 }
 
-interface BountySchema {
+interface BountyData {
     title: string,
     body: string,
     categories: string[],
@@ -26,9 +26,16 @@ interface BountySchema {
     hasPrivateFulfillments: boolean,
     difficulty: Difficulty,
     attachments: {
-        ipfsHash: string,
-        ipfsFileName: string,
-        url: string,
+        ipfsHash?: string,
+        ipfsFileName?: string,
+        url?: string,
     },
     metadata: Metadata
+}
+
+interface MutableBountyData {
+    data?: BountyData,
+    approvers?: string[],
+    controller?: string,
+    deadline?: BigNumber
 }
