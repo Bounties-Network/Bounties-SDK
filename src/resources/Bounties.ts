@@ -28,7 +28,7 @@ export class BountiesClient {
         payoutTokens: string[],
         tokenVersions: (number | string)[],
         tokenAmounts: BigNumber[],
-        gasPrice: BigNumber = new BigNumber(5)
+        gasPrice?: BigNumber
     ): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -74,7 +74,7 @@ export class BountiesClient {
                         from: (await this.bounties._web3.eth.getAccounts())[0],
                         to: bountiesFactory._address,
                         gas: 40000,
-                        gasPrice: gasPrice.toString()
+                        gasPrice: gasPrice ? gasPrice.toString() : undefined
                     })
                     .on('transactionHash', hash => resolve(hash))
                     .on('error', error => reject(error))
@@ -89,7 +89,7 @@ export class BountiesClient {
         payoutTokens: string[],
         tokenVersions: BigNumber[],
         tokenAmounts: BigNumber[],
-        gasPrice: BigNumber = new BigNumber(5)
+        gasPrice?: BigNumber
     ): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -104,7 +104,7 @@ export class BountiesClient {
                         from: (await this.bounties._web3.eth.getAccounts())[0],
                         to: bountyClient._address,
                         gas: 40000,
-                        gasPrice: gasPrice.toString()
+                        gasPrice: gasPrice ? gasPrice.toString() : undefined
                     })
                     .on('transactionHash', hash => resolve(hash))
                     .on('error', error => reject(error))
@@ -117,7 +117,7 @@ export class BountiesClient {
     update(
         bountyAddress: string,
         values: MutableBountyData,
-        gasPrice: BigNumber = new BigNumber(5)
+        gasPrice?: BigNumber
     ): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -179,7 +179,7 @@ export class BountiesClient {
                         from,
                         to: bountyClient._address,
                         gas: 40000,
-                        gasPrice: gasPrice.toString()
+                        gasPrice: gasPrice ? gasPrice.toString() : undefined
                     })
                     .on('transactionHash', hash => resolve(hash))
                     .on('error', error => reject(error))
@@ -192,7 +192,7 @@ export class BountiesClient {
     _changeController(
         bountyAddress: string,
         controller: string,
-        gasPrice: BigNumber = new BigNumber(5)
+        gasPrice?: BigNumber
     ): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -205,7 +205,7 @@ export class BountiesClient {
                         from: (await this.bounties._web3.eth.getAccounts())[0],
                         to: bountyClient._address,
                         gas: 40000,
-                        gasPrice: gasPrice.toString()
+                        gasPrice: gasPrice ? gasPrice.toString() : undefined
                     })
                     .on('transactionHash', hash => resolve(hash))
                     .on('error', error => reject(error))
@@ -219,7 +219,7 @@ export class BountiesClient {
         bountyAddress: string,
         approverId: BigNumber,
         newApproverAddress: string,
-        gasPrice: BigNumber = new BigNumber(5)
+        gasPrice?: BigNumber
     ): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -233,7 +233,7 @@ export class BountiesClient {
                         from: (await this.bounties._web3.eth.getAccounts())[0],
                         to: bountyClient._address,
                         gas: 40000,
-                        gasPrice: gasPrice.toString()
+                        gasPrice: gasPrice ? gasPrice.toString() : undefined
                     })
                     .on('transactionHash', hash => resolve(hash))
                     .on('error', error => reject(error))
@@ -246,7 +246,7 @@ export class BountiesClient {
     _changeData(
         bountyAddress: string,
         data: string,
-        gasPrice: BigNumber = new BigNumber(5)
+        gasPrice?: BigNumber
     ): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -259,7 +259,7 @@ export class BountiesClient {
                         from: (await this.bounties._web3.eth.getAccounts())[0],
                         to: bountyClient._address,
                         gas: 40000,
-                        gasPrice: gasPrice.toString()
+                        gasPrice: gasPrice ? gasPrice.toString() : undefined
                     })
                     .on('transactionHash', hash => resolve(hash))
                     .on('error', error => reject(error))
@@ -272,7 +272,7 @@ export class BountiesClient {
     _changeDeadline(
         bountyAddress: string,
         deadline: BigNumber,
-        gasPrice: BigNumber = new BigNumber(5)
+        gasPrice?: BigNumber
     ): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -285,7 +285,7 @@ export class BountiesClient {
                         from: (await this.bounties._web3.eth.getAccounts())[0],
                         to: bountyClient._address,
                         gas: 40000,
-                        gasPrice: gasPrice.toString()
+                        gasPrice: gasPrice ? gasPrice.toString() : undefined
                     })
                     .on('transactionHash', hash => resolve(hash))
                     .on('error', error => reject(error))

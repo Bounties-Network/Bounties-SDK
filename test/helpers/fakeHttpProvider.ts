@@ -46,7 +46,7 @@ export class FakeHttpProvider implements Provider {
         expect(isArray(payload) || isObject(payload)).toEqual(true);
         expect(isFunction(callback)).toEqual(true);
 
-        // console.log(payload)
+        console.log(payload)
 
         var validation = this.validation.shift();
 
@@ -95,7 +95,29 @@ export class FakeHttpProvider implements Provider {
         return response
     }
 
-    injectValidation(callback: ValidationCallback) {
+
+
+    injectValidation(callback: ValidationCallback): void
+    injectValidation(callback: ValidationCallback, options: { gasPrice: string, txHash: string } ): void
+
+    injectValidation(callback: ValidationCallback, options?: { gasPrice: string, txHash: string }) {
+        if(options) {
+            this.injectResult(options.gasPrice)
+            this.validation.push((payload: JsonRPCRequest) => {
+                expect(payload.method).toEqual('eth_gasPrice')
+            })
+
+            this.validation.push(callback);
+
+            this.injectResult(options.txHash)
+            this.validation.push((payload: JsonRPCRequest) => {
+                expect(payload.method).toEqual('eth_getTransactionReceipt')
+                expect(payload.params).toEqual([options.txHash])
+            })
+
+            return
+        }
+
         this.validation.push(callback);
     }
 
