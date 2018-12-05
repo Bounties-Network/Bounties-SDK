@@ -1,89 +1,24 @@
-import Nock from 'nock'
-import Web3 from 'web3'
-import ipfsMini from 'ipfs-mini'
-import { map, findIndex } from 'lodash';
-
-import { FakeHttpProvider } from './helpers/fakeHttpProvider'
-import fixtures from './fixtures'
-import Bounties from '../src/bounties'
 import BigNumber from 'bignumber.js';
-import { Provider } from 'web3/providers';
-import { fileURLToPath } from 'url';
-import { Difficulty, BountyData } from '../src/types';
+import { map } from 'lodash';
 
-import { interfaces } from '../src/contracts/interfaces'
+import { bounties, bountyContract, nock } from './utils/instances'
+import fixtures from './fixtures'
+import { FakeHttpProvider } from './utils/fakeHttpProvider'
+import { constants } from './utils/constants'
+import { buildAddress, encodeParameters } from './utils/helpers'
 
 
-const buildTxHash = (hashId: number) => {
-    let hash = '0x7000000000000000000000000000000000000000000000000000000000000000'.slice(
-        0, 66 - hashId.toString().length
-    )
-
-    return hash + hashId.toString()
-}
-
-const buildAddress = (id: number) => {
-    let address = '0xADD3255000000000000000000000000000000000'.slice(
-        0, 42 - id.toString().length
-    )
-
-    return Web3.utils.toChecksumAddress(address + id.toString())
-}
-
-const USER_ADDRESS = buildAddress(100)
-const FACTORY_ADDRESS = buildAddress(200)
-const BOUNTY_ADDRESS = buildAddress(300)
-const GAS = '0x9c40'
-const GAS_PRICE = '0x5'
-const TX_HASH = buildTxHash(0)
-const IPFS_HASH = 'QmP8QJoTxvxnFm3WSsdG3SdVDSvktJkcmrQ7PmY3Q2D7RX'
-const TX_OPTIONS = {
-    from: USER_ADDRESS.toLowerCase(),
-    to: BOUNTY_ADDRESS.toLowerCase(),
-    gas: GAS,
-    gasPrice: GAS_PRICE
-}
-const BOUNTY_DATA = {
-    title: 'Bounty Title',
-    body: 'Bounty body!!',
-    categories: ['javascript', 'research'],
-    expectedNumberOfRevisions: 1,
-    hasPrivateFulfillments: true,
-    difficulty: 'Beginner' as Difficulty,
-    attachments: {
-        ipfsHash: IPFS_HASH,
-        ipfsFileName: 'pic.jpg',
-        url: 'https://bounties.network',
-    },
-    metadata: {
-        platform: 'bounties',
-        schemaVersion: 0.2,
-        schemaName: 'standard'
-    }
-}
-
-// web3
-const web3 = new Web3(new Web3.providers.HttpProvider('https://rinkeby.infura.io'))
-// incorrect web3 types
-const encodeParameter = (type: string | object, parameter: any) => (web3.eth.abi.encodeParameter as Function)(type, parameter).replace('0x', '')
-const encodeParameters = (types: string[], parameters: any[]) => web3.eth.abi.encodeParameters(types, parameters)
-const methodSignature = (method: string) => interfaces.StandardBounty[findIndex(interfaces.StandardBounty, item => item.name == method)].signature.replace('0x', '')
-
-// mock ipfs
-ipfsMini.prototype.addJSON = (data: object, callback: Function ) => callback(null, 'QmP8QJoTxvxnFm3WSsdG3SdVDSvktJkcmrQ7PmY3Q2D7RX')
-const ipfs = new ipfsMini({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' })
-
-// mock http
-Nock.disableNetConnect()
-const nock = Nock('https://api.bounties.network/').log(console.log)
-
-const metadata = {
-    platform: 'bounties-network',
-    schemaVersion: 0.2,
-    schemaName: 'standard'
-}
-const bounties = new Bounties(web3, ipfs, FACTORY_ADDRESS, metadata)
-const bountyContract = bounties.bountyClient(BOUNTY_ADDRESS).methods
+const {
+    USER_ADDRESS,
+    FACTORY_ADDRESS,
+    BOUNTY_ADDRESS,
+    GAS,
+    GAS_PRICE,
+    TX_HASH,
+    IPFS_HASH,
+    TX_OPTIONS,
+    BOUNTY_DATA,
+} = constants
 
 describe('bounty module', () => {
     describe.skip('offchain', () => {
@@ -110,6 +45,7 @@ describe('bounty module', () => {
         })
     })
 
+
     describe('onchain', () => {
         let provider: FakeHttpProvider
 
@@ -124,10 +60,12 @@ describe('bounty module', () => {
             })
         })
 
+
         describe.skip('create', () => {
             it('should create bounty that pays out in ether', async () => { })
             it('should create bounty that pays out in tokens', async () => { })
         })
+
 
         describe('update', () => {
             const intitialBounty = {
@@ -152,6 +90,7 @@ describe('bounty module', () => {
                 },
                 deadline: new BigNumber(new Date(2100, 9, 29).getTime() / 1000)
             }
+
 
             describe('changeBounty', () => {
                 beforeEach(() => {
@@ -181,7 +120,6 @@ describe('bounty module', () => {
                     )
                 })
 
-
                 it('should update all bounty values', async () => {
                     provider.injectValidation(
                         payload => {
@@ -210,9 +148,8 @@ describe('bounty module', () => {
                             data: updatedBounty.data.object,
                             deadline: updatedBounty.deadline
                         }
-                    )).resolves.toBe(buildTxHash(0))
+                    )).resolves.toBe(TX_HASH)
                 })
-
 
                 it('should update bounty except for controller', async () => {
                     provider.injectValidation(
@@ -241,7 +178,7 @@ describe('bounty module', () => {
                             data: updatedBounty.data.object,
                             deadline: updatedBounty.deadline
                         }
-                    )).resolves.toBe(buildTxHash(0))
+                    )).resolves.toBe(TX_HASH)
                 })
 
                 it('should update bounty except for approvers and deadline', async () => {
@@ -270,7 +207,7 @@ describe('bounty module', () => {
                             controller: updatedBounty.controller,
                             data: updatedBounty.data.object,
                         }
-                    )).resolves.toBe(buildTxHash(0))
+                    )).resolves.toBe(TX_HASH)
                 })
 
                 // needs data to be returnd from getBounty()
@@ -299,9 +236,10 @@ describe('bounty module', () => {
                         {
                             approvers: updatedBounty.approvers,
                         }
-                    )).resolves.toBe(buildTxHash(0))
+                    )).resolves.toBe(TX_HASH)
                 })
             })
+
 
             describe('changeController', async () => {
                 it('should change the controller', async () => {
@@ -324,9 +262,10 @@ describe('bounty module', () => {
                     await expect(bounties.bounties.update(
                         BOUNTY_ADDRESS,
                         { controller: updatedBounty.controller }
-                    )).resolves.toBe(buildTxHash(0))
+                    )).resolves.toBe(TX_HASH)
                 })
             })
+
 
             describe('changeData', async () => {
                 it('should change the data associated with the bounty', async () => {
@@ -349,9 +288,10 @@ describe('bounty module', () => {
                     await expect(bounties.bounties.update(
                         BOUNTY_ADDRESS,
                         { data: updatedBounty.data.object }
-                    )).resolves.toBe(buildTxHash(0))
+                    )).resolves.toBe(TX_HASH)
                 })
             })
+
 
             describe('changeDeadline', async () => {
                 it('should change the data associated with the bounty', async () => {
@@ -374,10 +314,11 @@ describe('bounty module', () => {
                     await expect(bounties.bounties.update(
                         BOUNTY_ADDRESS,
                         { deadline: updatedBounty.deadline }
-                    )).resolves.toBe(buildTxHash(0))
+                    )).resolves.toBe(TX_HASH)
                 })
             })
         })
+
 
         describe('drain', () => {
             const payoutTokens = [buildAddress(0), buildAddress(1)]
@@ -408,7 +349,7 @@ describe('bounty module', () => {
                     payoutTokens,
                     tokenVersions,
                     tokenAmounts,
-                )).resolves.toBe(buildTxHash(0))
+                )).resolves.toBe(TX_HASH)
             })
         })
     })
