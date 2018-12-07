@@ -1,3 +1,6 @@
+import { BigNumber } from 'bignumber.js'
+import { Bounty, Difficulty } from '../types/types'
+
 export const HTTP_200_OK = 200;
 export const HTTP_300_MULTIPLE_CHOICES = 300;
 export const HTTP_400_BAD_REQUEST = 400;
@@ -9,6 +12,31 @@ export const HTTP_404_MOD_NOT_FOUND = 40401;
 export const HTTP_422_UNKNOWN = 422;
 export const HTTP_500_INTERNAL_SERVER_ERROR = 500;
 export const HTTP_503_SERVICE_UNAVAILABLE = 503;
+
+export const EMPTY_BOUNTY: Bounty = {
+  address: '',
+  controller: '',
+  approvers: [],
+  data: '',
+  deadline: new BigNumber(0),
+  balance: {},
+  payoutAmount: {},
+  fulfillments: [],
+  contributions: [],
+  comments: [],
+  title: '',
+  body: '',
+  categories: [],
+  expectedNumberOfRevisions: new BigNumber(0),
+  hasPrivateFulfillments: true,
+  difficulty: 'beginner' as Difficulty,
+  attachments: {},
+  metadata: {
+      platform: '',
+      schemaVersion: 0,
+      schemaName: ''
+  },
+}
 
 /*
 export const DEFAULT_MARKDOWN = `# Description

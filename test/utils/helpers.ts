@@ -1,6 +1,8 @@
 import Web3 from 'web3'
 import { findIndex } from 'lodash';
 import { interfaces } from '../../src/contracts/interfaces'
+import { FakeHttpProvider } from './fakeHttpProvider'
+import { constants } from './constants'
 
 
 const web3 = new Web3()
@@ -33,3 +35,15 @@ export const methodSignature = (method: string) => (
         findIndex(interfaces.StandardBounty, item => item.name == method)
     ].signature.replace('0x', '')
 )
+
+export const prepareProvider = () => {
+    const provider = new FakeHttpProvider()
+
+    // inject result for web3.eth.getAccounts() calls
+    provider.injectResult([constants.USER_ADDRESS])
+    provider.injectValidation(payload => {
+        expect(payload.method).toEqual('eth_accounts')
+    })
+
+    return provider
+}

@@ -1,30 +1,36 @@
 import { buildAddress, buildTxHash } from './helpers'
-import { Difficulty } from '../../src/types';
+import { Difficulty, BountyData } from '../../src/types/types';
+import BigNumber from 'bignumber.js';
 
 
 const USER_ADDRESS = buildAddress(100)
 const FACTORY_ADDRESS = buildAddress(200)
 const BOUNTY_ADDRESS = buildAddress(300)
+
 const GAS = '0x9c40'
 const GAS_PRICE = '0x5'
+
 const TX_HASH = buildTxHash(0)
-const IPFS_HASH = 'QmP8QJoTxvxnFm3WSsdG3SdVDSvktJkcmrQ7PmY3Q2D7RX'
 const TX_OPTIONS = {
     from: USER_ADDRESS.toLowerCase(),
     to: BOUNTY_ADDRESS.toLowerCase(),
     gas: GAS,
     gasPrice: GAS_PRICE
 }
+
+const IPFS_HASH = 'QmP8QJoTxvxnFm3WSsdG3SdVDSvktJkcmrQ7PmY3Q2D7RX'
+
 const BOUNTY_METADATA = {
     platform: 'bounties-network',
     schemaVersion: 0.2,
     schemaName: 'standard'
 }
-const BOUNTY_DATA = {
+
+const BOUNTY_DATA: BountyData = {
     title: 'Bounty Title',
     body: 'Bounty body!!',
     categories: ['javascript', 'research'],
-    expectedNumberOfRevisions: 1,
+    expectedNumberOfRevisions: new BigNumber(1),
     hasPrivateFulfillments: true,
     difficulty: 'Beginner' as Difficulty,
     attachments: {
@@ -34,7 +40,6 @@ const BOUNTY_DATA = {
     },
     metadata: BOUNTY_METADATA
 }
-
 
 export const constants = {
     USER_ADDRESS,

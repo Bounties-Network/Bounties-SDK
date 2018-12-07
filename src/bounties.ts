@@ -3,9 +3,10 @@ import IPFSMini from 'ipfs-mini';
 import { addJSON } from './utils/helpers'
 import { interfaces } from './contracts/interfaces'
 
-import { BountiesClient } from './resources/Bounties'
+import { Bounties as BountiesClient } from './clients/Bounties'
 import { Request  } from './utils/request'
 
+import { Metadata } from './types'
 import { HumanStandardToken } from './contracts/types/HumanStandardToken'
 import { StandardBountiesFactory } from './contracts/types/StandardBountiesFactory'
 import { StandardBounty } from './contracts/types/StandardBounty'

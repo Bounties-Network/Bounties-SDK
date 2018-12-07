@@ -1,91 +1,85 @@
+import { Base } from '../Base'
 import { Request } from '../utils/request'
 // import { calculateDecimals } from '../utils/helpers'
-import { map, size, isArray } from 'lodash'
+import { assign, map, size, isArray, forEach } from 'lodash'
 import { BigNumber } from 'bignumber.js'
 import Bounties from '../bounties';
 import { rejects } from 'assert';
-import { MutableBountyData, BountyData } from '../types';
+import { Bounty as BountyType, MutableBountyData, BountyData, Metadata, Difficulty } from '../types/types'
+import { Fulfillments } from './Fulfillment';
+import { StandardBounty } from '../contracts/types/StandardBounty';
+import { EMPTY_BOUNTY } from '../utils/constants'
 
 
-export class BountiesClient {
-    bounties: Bounties
-    request: Request
+export class Bounty extends Base implements BountyType {
+    isLoaded: boolean
+    client: StandardBounty
 
-    constructor(bounties: Bounties) {
-        this.bounties = bounties
-        this.request = bounties.request
+    // stored in contract
+    address: string
+    controller: string
+    approvers: string[]
+    data: string
+    deadline: BigNumber
+    balance: { [address: string]: { type: BigNumber, amount: BigNumber } }
+    payoutAmount: { [address: string]: { type: BigNumber, amount: BigNumber } }
+
+    // relations
+    fulfillments: any // TODO: implement Fulfillments class
+    contributions: any // TODO: implement Contributions class
+    comments: any // TODO: implement Comments class
+
+    // ipfs data
+    title: string
+    body: string
+    categories: string[]
+    expectedNumberOfRevisions: BigNumber
+    hasPrivateFulfillments: boolean
+    difficulty: Difficulty
+    attachments: {
+        ipfsHash?: string,
+        ipfsFileName?: string,
+        url?: string,
     }
+    metadata: Metadata
 
-    load(id: number, params?: object) {
-        return this.request.get(`bounty/${id}/`, params)
-    }
+    constructor(bounties: Bounties, address: string)
+    constructor(bounties: Bounties, data: BountyType)
+    constructor(bounties: Bounties, addressOrData: string | BountyType) {
+        super(bounties)
 
-    create(
-        bountyValues: BountyData,
-        controller: string,
-        approvers: string[],
-        deadline: BigNumber,
-        payoutTokens: string[],
-        tokenVersions: (number | string)[],
-        tokenAmounts: BigNumber[],
-        gasPrice?: BigNumber
-    ): Promise<string> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const bountiesFactory = this.bounties.factory
+        let bounty = EMPTY_BOUNTY
 
-                const bounties = this.bounties
-                const { tokenClient, _ipfs: ipfs } = bounties
+        this.isLoaded = false
+        this.address = typeof addressOrData == 'string' ? addressOrData : addressOrData.address
 
-                const ipfsHash: string = await ipfs.addJSON(bountyValues)
+        if (typeof addressOrData != 'string') {
+            this.isLoaded = true
+            assign(bounty, addressOrData)
 
-                /*
-                // TODO: batch transactions & add support for 721
-                map(payoutTokens, (tokenAddress, index) => {
-                    if (tokenAddress == '0x0000000000000000000000000000000000000000') {
-                        const tokenContract = tokenClient(tokenAddress)
+        }
 
-                        tokenContract.methods.approve(
-                            bountyAddress,
-                            tokenAmounts[index].toString()
-                        )
-                        .send({
-                            from: (await this.bounties._web3.eth.getAccounts())[0],
-                            to: bountyAddress,
-                            gas: 40000,
-                            gasPrice: gasPrice.toString()
-                        })
-                        .on('transactionHash', hash => resolve(hash))
-                        .on('error', error => reject(error))
-
-
-                        await approve(bounties.contract.options.address, balance)
-                    }
-                })
-                */
-
-                bountiesFactory.methods.createBounty(
-                    controller,
-                    approvers,
-                    ipfsHash,
-                    deadline.toNumber()
-                )
-                    .send({
-                        from: (await this.bounties._web3.eth.getAccounts())[0],
-                        to: bountiesFactory._address,
-                        gas: 40000,
-                        gasPrice: gasPrice ? gasPrice.toString() : undefined
-                    })
-                    .on('transactionHash', hash => resolve(hash))
-                    .on('error', error => reject(error))
-            } catch (e) {
-                reject(e)
-            }
-        })
+        this.client = bounties.bountyClient(this.address)
+        this.controller = bounty.controller
+        this.approvers = bounty.approvers
+        this.data = bounty.data
+        this.deadline = bounty.deadline
+        this.balance = bounty.balance
+        this.payoutAmount = bounty.payoutAmount
+        this.fulfillments = bounty.fulfillments
+        this.contributions = bounty.contributions
+        this.comments = bounty.comments
+        this.title = bounty.title
+        this.body = bounty.body
+        this.categories = bounty.categories
+        this.expectedNumberOfRevisions = bounty.expectedNumberOfRevisions
+        this.hasPrivateFulfillments = bounty.hasPrivateFulfillments
+        this.difficulty = bounty.difficulty
+        this.attachments = bounty.attachments
+        this.metadata = bounty.metadata
     }
 
     drain(
-        bountyAddress: string,
         payoutTokens: string[],
         tokenVersions: BigNumber[],
         tokenAmounts: BigNumber[],
@@ -93,16 +87,14 @@ export class BountiesClient {
     ): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
-                const bountyClient = this.bounties.bountyClient(bountyAddress)
-
-                bountyClient.methods.drainBounty(
+                this.client.methods.drainBounty(
                     payoutTokens,
                     map(tokenVersions, version => version.toString()),
                     map(tokenAmounts, amount => amount.toString())
                 )
                     .send({
                         from: (await this.bounties._web3.eth.getAccounts())[0],
-                        to: bountyClient._address,
+                        to: this.address,
                         gas: 40000,
                         gasPrice: gasPrice ? gasPrice.toString() : undefined
                     })
@@ -115,7 +107,6 @@ export class BountiesClient {
     }
 
     update(
-        bountyAddress: string,
         values: MutableBountyData,
         gasPrice?: BigNumber
     ): Promise<string> {
@@ -124,7 +115,7 @@ export class BountiesClient {
                 if (size(values) == 1) {
                     if (values.controller) {
                         return this._changeController(
-                            bountyAddress,
+                            this.address,
                             values.controller,
                             gasPrice
                         )
@@ -135,7 +126,7 @@ export class BountiesClient {
                     if (values.data) {
                         const ipfsHash: string = await this.bounties._ipfs.addJSON(values.data)
                         return this._changeData(
-                            bountyAddress,
+                            this.address,
                             ipfsHash,
                             gasPrice
                         )
@@ -146,7 +137,7 @@ export class BountiesClient {
 
                     if (values.deadline) {
                         return this._changeDeadline(
-                            bountyAddress,
+                            this.address,
                             values.deadline,
                             gasPrice
                         )
@@ -155,21 +146,20 @@ export class BountiesClient {
                     }
                 }
 
-                const bountyClient = this.bounties.bountyClient(bountyAddress)
                 const from = (await this.bounties._web3.eth.getAccounts())[0]
 
                 const {
                     0: controller,
                     4: approvers,
                     5: deadline,
-                } = await bountyClient.methods.getBounty().call()
+                } = await this.client.methods.getBounty().call()
 
                 let ipfsHash
                 if (values.data) {
                     ipfsHash = await this.bounties._ipfs.addJSON(values.data)
                 }
 
-                bountyClient.methods.changeBounty(
+                this.client.methods.changeBounty(
                     values.controller || controller,
                     values.approvers || approvers,
                     ipfsHash || 'hello',
@@ -177,7 +167,7 @@ export class BountiesClient {
                 )
                     .send({
                         from,
-                        to: bountyClient._address,
+                        to: this.address,
                         gas: 40000,
                         gasPrice: gasPrice ? gasPrice.toString() : undefined
                     })
@@ -196,14 +186,12 @@ export class BountiesClient {
     ): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
-                const bountyClient = this.bounties.bountyClient(bountyAddress)
-
-                bountyClient.methods.changeController(
+                this.client.methods.changeController(
                     controller
                 )
                     .send({
                         from: (await this.bounties._web3.eth.getAccounts())[0],
-                        to: bountyClient._address,
+                        to: this.address,
                         gas: 40000,
                         gasPrice: gasPrice ? gasPrice.toString() : undefined
                     })
@@ -223,15 +211,13 @@ export class BountiesClient {
     ): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
-                const bountyClient = this.bounties.bountyClient(bountyAddress)
-
-                bountyClient.methods.changeApprover(
+                this.client.methods.changeApprover(
                     approverId.toString(),
                     newApproverAddress
                 )
                     .send({
                         from: (await this.bounties._web3.eth.getAccounts())[0],
-                        to: bountyClient._address,
+                        to: this.address,
                         gas: 40000,
                         gasPrice: gasPrice ? gasPrice.toString() : undefined
                     })
@@ -250,14 +236,12 @@ export class BountiesClient {
     ): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
-                const bountyClient = this.bounties.bountyClient(bountyAddress)
-
-                bountyClient.methods.changeData(
+                this.client.methods.changeData(
                     data
                 )
                     .send({
                         from: (await this.bounties._web3.eth.getAccounts())[0],
-                        to: bountyClient._address,
+                        to: this.address,
                         gas: 40000,
                         gasPrice: gasPrice ? gasPrice.toString() : undefined
                     })
@@ -276,14 +260,12 @@ export class BountiesClient {
     ): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
-                const bountyClient = this.bounties.bountyClient(bountyAddress)
-
-                bountyClient.methods.changeDeadline(
+                this.client.methods.changeDeadline(
                     deadline.toString()
                 )
                     .send({
                         from: (await this.bounties._web3.eth.getAccounts())[0],
-                        to: bountyClient._address,
+                        to: this.address,
                         gas: 40000,
                         gasPrice: gasPrice ? gasPrice.toString() : undefined
                     })

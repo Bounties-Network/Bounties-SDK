@@ -5,7 +5,8 @@ import { bounties, bountyContract, nock } from './utils/instances'
 import fixtures from './fixtures'
 import { FakeHttpProvider } from './utils/fakeHttpProvider'
 import { constants } from './utils/constants'
-import { buildAddress, encodeParameters } from './utils/helpers'
+import { buildAddress, encodeParameters, prepareProvider } from './utils/helpers'
+import { Bounty } from '../src/models/Bounty';
 
 
 const {
@@ -20,13 +21,15 @@ const {
     BOUNTY_DATA,
 } = constants
 
-describe('bounty module', () => {
+describe('bounties module', () => {
+
+    /*
     describe.skip('offchain', () => {
         describe('load', () => {
             it('should load bounty with specified id', async () => {
                 nock.get('/bounty/1/').reply(200, fixtures.bounty)
 
-                const bounty = await bounties.bounties.load((1))
+                const bounty = await bounties.bounties.retrieve((1))
                 expect(bounty).toEqual(fixtures.bounty)
             })
 
@@ -34,30 +37,27 @@ describe('bounty module', () => {
                 const params = { platform__in: 'bounties' }
                 nock.get('/bounty/1/').query(params).reply(200, fixtures.bounty)
 
-                const bounty = await bounties.bounties.load(1, params)
+                const bounty = await bounties.bounties.retrieve(1, params)
                 expect(bounty).toEqual(fixtures.bounty)
             })
 
             it('should fail if id does not exist', async () => {
                 nock.get('/bounty/1234/').reply(400, fixtures.bounty);
-                await expect(bounties.bounties.load(1)).rejects.toThrow(new Error('404'))
+                await expect(bounties.bounties.retrieve(1)).rejects.toThrow(new Error('404'))
             })
         })
     })
+    */
 
 
     describe('onchain', () => {
         let provider: FakeHttpProvider
+        let bounty: Bounty
 
-        beforeEach(() => {
-            provider = new FakeHttpProvider()
+        beforeEach(async () => {
+            provider = prepareProvider()
             bounties._web3.setProvider(provider)
-
-            // inject result for web3.eth.getAccounts() calls
-            provider.injectResult([USER_ADDRESS])
-            provider.injectValidation(payload => {
-                expect(payload.method).toEqual('eth_accounts')
-            })
+            bounty = await bounties.bounties.retrieve(BOUNTY_ADDRESS, { offline: true })
         })
 
 
@@ -126,10 +126,10 @@ describe('bounty module', () => {
                             expect(payload.method).toEqual('eth_sendTransaction')
                             expect(payload.params).toEqual([{
                                 data: bountyContract.changeBounty(
-                                updatedBounty.controller,
-                                updatedBounty.approvers,
-                                updatedBounty.data.hash,
-                                updatedBounty.deadline.toString()
+                                    updatedBounty.controller,
+                                    updatedBounty.approvers,
+                                    updatedBounty.data.hash,
+                                    updatedBounty.deadline.toString()
                                 ).encodeABI(),
                                 ...TX_OPTIONS
                             }])
@@ -140,8 +140,7 @@ describe('bounty module', () => {
                         }
                     )
 
-                    await expect(bounties.bounties.update(
-                        BOUNTY_ADDRESS,
+                    await expect(bounty.update(
                         {
                             controller: updatedBounty.controller,
                             approvers: updatedBounty.approvers,
@@ -171,8 +170,7 @@ describe('bounty module', () => {
                         }
                     )
 
-                    await expect(bounties.bounties.update(
-                        BOUNTY_ADDRESS,
+                    await expect(bounty.update(
                         {
                             approvers: updatedBounty.approvers,
                             data: updatedBounty.data.object,
@@ -201,8 +199,7 @@ describe('bounty module', () => {
                         }
                     )
 
-                    await expect(bounties.bounties.update(
-                        BOUNTY_ADDRESS,
+                    await expect(bounty.update(
                         {
                             controller: updatedBounty.controller,
                             data: updatedBounty.data.object,
@@ -223,7 +220,7 @@ describe('bounty module', () => {
                                     intitialBounty.deadline.toString(),
                                 ).encodeABI(),
                                 ...TX_OPTIONS
-                          }])
+                            }])
                         },
                         {
                             gasPrice: GAS_PRICE,
@@ -231,8 +228,7 @@ describe('bounty module', () => {
                         }
                     )
 
-                    await expect(bounties.bounties.update(
-                        BOUNTY_ADDRESS,
+                    await expect(bounty.update(
                         {
                             approvers: updatedBounty.approvers,
                         }
@@ -259,8 +255,7 @@ describe('bounty module', () => {
                         }
                     )
 
-                    await expect(bounties.bounties.update(
-                        BOUNTY_ADDRESS,
+                    await expect(bounty.update(
                         { controller: updatedBounty.controller }
                     )).resolves.toBe(TX_HASH)
                 })
@@ -285,8 +280,7 @@ describe('bounty module', () => {
                         }
                     )
 
-                    await expect(bounties.bounties.update(
-                        BOUNTY_ADDRESS,
+                    await expect(bounty.update(
                         { data: updatedBounty.data.object }
                     )).resolves.toBe(TX_HASH)
                 })
@@ -311,8 +305,7 @@ describe('bounty module', () => {
                         }
                     )
 
-                    await expect(bounties.bounties.update(
-                        BOUNTY_ADDRESS,
+                    await expect(bounty.update(
                         { deadline: updatedBounty.deadline }
                     )).resolves.toBe(TX_HASH)
                 })
@@ -344,12 +337,13 @@ describe('bounty module', () => {
                     }
                 )
 
-                await expect(bounties.bounties.drain(
-                    BOUNTY_ADDRESS,
-                    payoutTokens,
-                    tokenVersions,
-                    tokenAmounts,
-                )).resolves.toBe(TX_HASH)
+                await expect(
+                    bounty.drain(
+                        payoutTokens,
+                        tokenVersions,
+                        tokenAmounts,
+                    )
+                ).resolves.toBe(TX_HASH)
             })
         })
     })

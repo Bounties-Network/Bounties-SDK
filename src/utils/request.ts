@@ -1,5 +1,4 @@
 import axios, { AxiosRequestConfig, AxiosPromise, AxiosResponse } from 'axios';
-import Bounties from '../bounties';
 import {
     HTTP_401_UNAUTHORIZED,
     HTTP_200_OK,
@@ -7,6 +6,7 @@ import {
     HTTP_500_INTERNAL_SERVER_ERROR,
     HTTP_300_MULTIPLE_CHOICES
 } from './constants';
+import { HttpMethod } from '../types/types'
 
 
 export class Request {
@@ -68,10 +68,10 @@ export const HttpOptions: { [s: string]: HttpMethod } = {
     'GET': {
         method: 'GET',
         withCredentials: true
-    } 
+    }
 }
 
-// The type binds provided by Axios do not include 
+// The type binds provided by Axios do not include
 // message or statusCode so they are inlined here.
 interface AxiosError {
     config: AxiosRequestConfig,
