@@ -1,4 +1,4 @@
-import { Base } from '../Base'
+import { BaseModel } from './BaseModel'
 import { Request } from '../utils/request'
 // import { calculateDecimals } from '../utils/helpers'
 import { assign, map, size, isArray, forEach } from 'lodash'
@@ -11,7 +11,7 @@ import { StandardBounty } from '../contracts/types/StandardBounty';
 import { EMPTY_BOUNTY } from '../utils/constants'
 
 
-export class Bounty extends Base implements BountyType {
+export class Bounty extends BaseModel {
     isLoaded: boolean
     client: StandardBounty
 
@@ -46,19 +46,18 @@ export class Bounty extends Base implements BountyType {
     constructor(bounties: Bounties, address: string)
     constructor(bounties: Bounties, data: BountyType)
     constructor(bounties: Bounties, addressOrData: string | BountyType) {
-        super(bounties)
-
         let bounty = EMPTY_BOUNTY
+        let address = typeof addressOrData == 'string' ? addressOrData : addressOrData.address
 
-        this.isLoaded = false
-        this.address = typeof addressOrData == 'string' ? addressOrData : addressOrData.address
+        super(bounties, address)
+        this.address = address
 
         if (typeof addressOrData != 'string') {
             this.isLoaded = true
             assign(bounty, addressOrData)
-
         }
 
+        // seems to be no good way in typescript to copy these values to `this`
         this.client = bounties.bountyClient(this.address)
         this.controller = bounty.controller
         this.approvers = bounty.approvers
@@ -114,7 +113,7 @@ export class Bounty extends Base implements BountyType {
             try {
                 if (size(values) == 1) {
                     if (values.controller) {
-                        return this._changeController(
+                        return this._changeContrwoller(
                             this.address,
                             values.controller,
                             gasPrice
