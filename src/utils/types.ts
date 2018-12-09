@@ -1,24 +1,25 @@
 import BigNumber from "bignumber.js";
 
-interface Metadata {
-    platform: string
-    schemaVersion: number
-    schemaName: string
-}
 
-interface HttpMethod {
+export interface HttpMethod {
     method: string,
     headers?: { [s: string]: string },
     withCredentials: boolean
 }
 
-declare enum Difficulty {
+export interface Metadata {
+    platform: string
+    schemaVersion: number
+    schemaName: string
+}
+
+export enum Difficulty {
     beginner = 'Beginner',
     intermediate = 'Intermediate',
     advanced = 'Advanced'
 }
 
-interface BountyData {
+export interface BountyData {
     title: string,
     body: string,
     categories: string[],
@@ -33,7 +34,7 @@ interface BountyData {
     metadata: Metadata
 }
 
-interface MutableBountyData {
+export interface MutableBountyData {
     data?: BountyData,
     approvers?: string[],
     controller?: string,

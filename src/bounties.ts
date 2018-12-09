@@ -1,6 +1,7 @@
 import Web3 from 'web3'
 import IPFSMini from 'ipfs-mini';
 import { addJSON } from './utils/helpers'
+import { Metadata } from './utils/types'
 import { interfaces } from './contracts/interfaces'
 
 import { BountiesClient } from './resources/Bounties'
@@ -9,6 +10,7 @@ import { Request  } from './utils/request'
 import { HumanStandardToken } from './contracts/types/HumanStandardToken'
 import { StandardBountiesFactory } from './contracts/types/StandardBountiesFactory'
 import { StandardBounty } from './contracts/types/StandardBounty'
+
 
 class Bounties {
     _web3: Web3
@@ -19,7 +21,6 @@ class Bounties {
 
     request: Request
     bounties: BountiesClient
-
 
     constructor(web3: Web3, ipfs: any, factoryAddress: string, metadata: Metadata) {
         if (!(web3 instanceof Web3)) {
@@ -47,15 +48,24 @@ class Bounties {
     }
 
     get factory() {
-        return new this._web3.eth.Contract(interfaces.StandardBountiesFactory, this._factoryAddress) as StandardBountiesFactory
+        return new this._web3.eth.Contract(
+            interfaces.StandardBountiesFactory,
+            this._factoryAddress
+        ) as StandardBountiesFactory
     }
 
     bountyClient(address: string) {
-        return new this._web3.eth.Contract(interfaces.StandardBounty, address) as StandardBounty
+        return new this._web3.eth.Contract(
+            interfaces.StandardBounty,
+            address
+        ) as StandardBounty
     }
 
     tokenClient(address: string) {
-        return new this._web3.eth.Contract(interfaces.HumanStandardToken, address) as HumanStandardToken
+        return new this._web3.eth.Contract(
+            interfaces.HumanStandardToken,
+            address
+        ) as HumanStandardToken
     }
 }
 

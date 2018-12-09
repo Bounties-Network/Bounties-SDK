@@ -1,5 +1,5 @@
 import { buildAddress, buildTxHash } from './helpers'
-import { Difficulty } from '../../src/types';
+import { Difficulty } from '../../src/utils/types';
 
 
 const USER_ADDRESS = buildAddress(100)
