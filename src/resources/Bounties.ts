@@ -1,19 +1,17 @@
+import { BaseResource } from './base';
 import { Request } from '../utils/request'
 // import { calculateDecimals } from '../utils/helpers'
 import { map, size, isArray } from 'lodash'
 import { BigNumber } from 'bignumber.js'
 import Bounties from '../bounties';
 import { rejects } from 'assert';
-import { MutableBountyData, BountyData } from '../types';
+import { MutableBountyData, BountyData } from '../utils/types';
 
 
-export class BountiesClient {
-    bounties: Bounties
-    request: Request
 
+export class BountiesClient extends BaseResource {
     constructor(bounties: Bounties) {
-        this.bounties = bounties
-        this.request = bounties.request
+        super(bounties)
     }
 
     load(id: number, params?: object) {
