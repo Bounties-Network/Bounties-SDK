@@ -1,4 +1,5 @@
 import { JsonRPCRequest, JsonRPCResponse, Provider, Callback } from "web3/providers";
+import { constants } from "./constants";
 
 const isObject   = (object: any) => object !== null && !(Array.isArray(object)) && typeof object === 'object'
 const isArray    = (object: any) => Array.isArray(object)
@@ -46,7 +47,7 @@ export class FakeHttpProvider implements Provider {
         expect(isArray(payload) || isObject(payload)).toEqual(true);
         expect(isFunction(callback)).toEqual(true);
 
-        console.log(payload)
+        // console.log(payload)
 
         var validation = this.validation.shift();
 
@@ -110,6 +111,17 @@ export class FakeHttpProvider implements Provider {
             this.validation.push(callback);
 
             this.injectResult(options.txHash)
+            this.injectResult({
+                "status": true,
+                "transactionHash": options.txHash,
+                "transactionIndex": 0,
+                "blockHash": "0xef95f2f1ed3ca60b048b4bf67cde2195961e0bba6f70bcbea9a2c4e133e34b46",
+                "blockNumber": 0,
+                "contractAddress": constants.BOUNTY_ADDRESS,
+                "cumulativeGasUsed": 1,
+                "gasUsed": 1,
+                "logs": [{}]
+            })
             this.validation.push((payload: JsonRPCRequest) => {
                 expect(payload.method).toEqual('eth_getTransactionReceipt')
                 expect(payload.params).toEqual([options.txHash])
