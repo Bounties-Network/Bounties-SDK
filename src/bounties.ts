@@ -8,6 +8,7 @@ import { BountiesClient } from './resources/Bounties'
 import { Request  } from './utils/request'
 import { User } from './resources/User'
 import { Categories } from './resources/Categories'
+import { Leaderboard } from './resources/Leaderboard'
 
 import { HumanStandardToken } from './contracts/types/HumanStandardToken'
 import { StandardBountiesFactory } from './contracts/types/StandardBountiesFactory'
@@ -25,6 +26,7 @@ class Bounties {
     bounties: BountiesClient
     user: User
     categories: Categories
+    leaderboard: Leaderboard
 
     constructor(web3: Web3, ipfs: any, factoryAddress: string, metadata: Metadata) {
         if (!(web3 instanceof Web3)) {
@@ -45,6 +47,7 @@ class Bounties {
         this.bounties = new BountiesClient(this)
         this.user = new User(this)
         this.categories = new Categories(this)
+        this.leaderboard = new Leaderboard(this)
 
         this.tokenClient = this.tokenClient.bind(this)
     }

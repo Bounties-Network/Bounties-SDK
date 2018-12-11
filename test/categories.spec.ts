@@ -1,23 +1,4 @@
-import BigNumber from 'bignumber.js';
-import { map } from 'lodash';
-
-import { bounties, bountyContract } from './utils/instances'
-import { FakeHttpProvider } from './utils/fakeHttpProvider'
-import { constants } from './utils/constants'
-import { buildAddress, encodeParameters } from './utils/helpers'
-
-
-const {
-    USER_ADDRESS,
-    FACTORY_ADDRESS,
-    BOUNTY_ADDRESS,
-    GAS,
-    GAS_PRICE,
-    TX_HASH,
-    IPFS_HASH,
-    TX_OPTIONS,
-    BOUNTY_DATA,
-} = constants
+import { bounties } from './utils/instances'
 
 describe('categories resource', () => {
     describe('offchain', () => {
