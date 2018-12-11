@@ -17,19 +17,19 @@ export class Request {
         this._endpoint = endpoint
     }
 
-    request(endpoint: string, relativePath: string, method: string = 'GET', options: AxiosRequestConfig): AxiosPromise {
+    request(endpoint: string, relativePath: string, method: string = 'GET', options: AxiosRequestConfig): Promise<any> {
         return axios
             .request({ url: `${endpoint}/${relativePath}`, ...HttpOptions[method.toUpperCase()], ...options })
             .then(checkRequestStatus)
             .catch(handleError);
     }
 
-    get(url: string, query?: object): AxiosPromise {
+    get(url: string, query?: object): Promise<any> {
         return this.request(this._endpoint, url, 'GET', { params: query })
     }
 
-    post(url: string, data: object): AxiosPromise {
-        return this.request(this._endpoint, url, 'POST', { params: data })
+    post(url: string, data: object): Promise<any> {
+        return this.request(this._endpoint, url, 'POST', { data: data })
     }
 }
 

@@ -6,6 +6,7 @@ import { interfaces } from './contracts/interfaces'
 
 import { BountiesClient } from './resources/Bounties'
 import { Request  } from './utils/request'
+import { User } from './resources/User'
 
 import { HumanStandardToken } from './contracts/types/HumanStandardToken'
 import { StandardBountiesFactory } from './contracts/types/StandardBountiesFactory'
@@ -21,6 +22,7 @@ class Bounties {
 
     request: Request
     bounties: BountiesClient
+    user: User
 
     constructor(web3: Web3, ipfs: any, factoryAddress: string, metadata: Metadata) {
         if (!(web3 instanceof Web3)) {
@@ -39,6 +41,7 @@ class Bounties {
 
         this.request = new Request(this._endpoint)
         this.bounties = new BountiesClient(this)
+        this.user = new User(this)
 
         this.tokenClient = this.tokenClient.bind(this)
     }

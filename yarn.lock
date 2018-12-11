@@ -71,7 +71,11 @@
   resolved "https://registry.yarnpkg.com/@types/underscore/-/underscore-1.8.9.tgz#fef41f800cd23db1b4f262ddefe49cd952d82323"
   integrity sha512-vfzZGgZKRFy7KEWcBGfIFk+h6B+thDCLfkD1exMBMRlUsx2icA+J6y4kAbZs/TjSTeY1duw89QUU133TSzr60Q==
 
+<<<<<<< HEAD
 "@types/web3@^1.0.14":
+=======
+"@types/web3@1.0.14":
+>>>>>>> 71aa534... add user resource
   version "1.0.14"
   resolved "https://registry.yarnpkg.com/@types/web3/-/web3-1.0.14.tgz#709b700b3eecf7fe9fb09771c4bf484add89912a"
   integrity sha512-N841xEBVwg0QNin3Zu+Yf7eEKKeJ0MROMc+FvfgtX8r/fwynFhSZVj3VONVcr9QP/Wffq+aggj+4lgrvG3lnFQ==
@@ -4966,6 +4970,11 @@ trim@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/trim/-/trim-0.0.1.tgz#5858547f6b290757ee95cccc666fb50084c460dd"
   integrity sha1-WFhUf2spB1fulczMZm+1AITEYN0=
+
+truffle-hdwallet-provider@1.0.0-web3one.3:
+  version "1.0.0-web3one.3"
+  resolved "https://registry.yarnpkg.com/truffle-hdwallet-provider/-/truffle-hdwallet-provider-1.0.0-web3one.3.tgz#47374d92b56c6f04c4e1dfd8d2950b596b338e52"
+  integrity sha512-y7qibnqeRvO4Ycmf4VhbiJPvw+gosRydWUepVVhOLRbktpTXHEYG/jwErbNXlgfYCZ5w0wpoHOiNM70IY1BLIQ==
 
 ts-essentials@^1.0.0:
   version "1.0.0"

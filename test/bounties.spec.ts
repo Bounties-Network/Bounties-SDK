@@ -1,8 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { map } from 'lodash';
 
-import { bounties, bountyContract, nock } from './utils/instances'
-import fixtures from './fixtures'
+import { bounties, bountyContract } from './utils/instances'
 import { FakeHttpProvider } from './utils/fakeHttpProvider'
 import { constants } from './utils/constants'
 import { buildAddress, encodeParameters } from './utils/helpers'
@@ -24,22 +23,16 @@ describe('bounty module', () => {
     describe.skip('offchain', () => {
         describe('load', () => {
             it('should load bounty with specified id', async () => {
-                nock.get('/bounty/1/').reply(200, fixtures.bounty)
 
                 const bounty = await bounties.bounties.load((1))
-                expect(bounty).toEqual(fixtures.bounty)
             })
 
             it('should load bounty with corrent parameters', async () => {
-                const params = { platform__in: 'bounties' }
-                nock.get('/bounty/1/').query(params).reply(200, fixtures.bounty)
 
-                const bounty = await bounties.bounties.load(1, params)
-                expect(bounty).toEqual(fixtures.bounty)
+                const bounty = await bounties.bounties.load(1)
             })
 
             it('should fail if id does not exist', async () => {
-                nock.get('/bounty/1234/').reply(400, fixtures.bounty);
                 await expect(bounties.bounties.load(1)).rejects.toThrow(new Error('404'))
             })
         })

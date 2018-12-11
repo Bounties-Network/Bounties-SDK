@@ -1,5 +1,5 @@
 import Web3 from 'web3'
-import { findIndex } from 'lodash';
+import { cloneDeep, findIndex, has, set } from 'lodash';
 import { interfaces } from '../../src/contracts/interfaces'
 
 
@@ -32,4 +32,15 @@ export const methodSignature = (method: string) => (
     interfaces.StandardBounty[
         findIndex(interfaces.StandardBounty, item => item.name == method)
     ].signature.replace('0x', '')
+)
+
+export const sanitize = (data: any, keys: string[]) => (
+    keys.reduce(
+        (result, key) => (
+            has(data, key)
+                ? set(cloneDeep(result), key, '[SANITIZED]')
+                : result
+        ),
+        data
+    )
 )
