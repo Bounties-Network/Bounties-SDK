@@ -28,10 +28,6 @@ describe('user resource', () => {
         const mnemonic = 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'
         const provider = new HDWalletProvider(mnemonic, "https://rinkeby.infura.io")
         bounties._web3.setProvider(provider)
-
-
-
-
     })
 
     describe('offchain', () => {
