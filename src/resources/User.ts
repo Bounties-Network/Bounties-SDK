@@ -1,13 +1,6 @@
 import { BaseResource } from './base'
-import { Request } from '../utils/request'
-// import { calculateDecimals } from '../utils/helpers'
-import { map, size, isArray } from 'lodash'
-import { BigNumber } from 'bignumber.js'
 import Bounties from '../bounties';
-import { rejects } from 'assert';
-import { MutableBountyData, BountyData } from '../utils/types';
-import { AxiosPromise } from 'axios';
-
+import { getCurrentAddress } from '../utils/helpers'
 
 export class User extends BaseResource {
     constructor(bounties: Bounties) {
@@ -21,18 +14,15 @@ export class User extends BaseResource {
     async login() {
         return new Promise(async (resolve, reject) => {
             try {
-                const currentAddress = (await this.web3.eth.getAccounts())[0]
+                const currentAddress = await getCurrentAddress(this.web3)
 
                 const {
-                    has_signed_up: hasSignedUp,
-                    nonce,
-                } = await this._nonce(currentAddress)
-
-                const message = this.web3.utils.fromUtf8('Hi there! Your special nonce: ' + nonce)
-                const signature = await this.web3.eth.sign(message, currentAddress)
+                    signature,
+                    hasSignedUp
+                } = await this._calculateLoginSignature(currentAddress)
 
                 const user = await this.request.post(
-                    `auth/login/`,
+                    'auth/login/',
                     {
                         public_address: currentAddress,
                         signature
@@ -54,4 +44,15 @@ export class User extends BaseResource {
         return this.request.get(`auth/${address}/nonce/`)
     }
 
+    async _calculateLoginSignature(address: string) {
+        const {
+            has_signed_up: hasSignedUp,
+            nonce,
+        } = await this._nonce(address)
+
+        const message = this.web3.utils.fromUtf8('Hi there! Your special nonce: ' + nonce)
+        const signature = await this.web3.eth.sign(message, address)
+
+        return { signature, hasSignedUp }
+    }
 }

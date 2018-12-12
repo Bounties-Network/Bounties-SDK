@@ -1,3 +1,4 @@
+import Web3 from 'web3'
 import { BigNumber } from 'bignumber.js';
 import { Tx } from 'web3/eth/types';
 
@@ -105,6 +106,11 @@ export const addJSON = (addJSON: Function) => (data: { [s: string]: [any] }) =>
       resolve(response)
     })
   })
+
+
+export const getCurrentAddress = async (web3: Web3) => (
+  (await web3.eth.getAccounts())[0]
+)
 
 // export const handleOnChainAction = (action: (...args: any) => string) => {
 //   return new Promise((resolve, reject) => {
