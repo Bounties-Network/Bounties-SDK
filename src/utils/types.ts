@@ -7,6 +7,20 @@ export interface HttpMethod {
     withCredentials: boolean
 }
 
+export interface DjangoListResponse<T> {
+    count: number,
+    results: T[]
+}
+
+export interface PlatformQueryParams {
+    platform?: string
+}
+
+export interface DjangoListQueryParams extends PlatformQueryParams {
+    limit?: number
+    offset?: number
+}
+
 export interface Metadata {
     platform: string
     schemaVersion: number

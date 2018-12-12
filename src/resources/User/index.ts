@@ -1,18 +1,21 @@
-import { BaseResource } from './base'
-import Bounties from '../bounties';
-import { getCurrentAddress } from '../utils/helpers'
+import { BaseResource } from '../base'
+import Bounties from '../../bounties';
+import { getCurrentAddress } from '../../utils/helpers'
+import { PlatformQueryParams } from '../../utils/types'
+import { User, LoginResponse } from './types'
+import { Log } from 'web3/types';
 
-export class User extends BaseResource {
+export class UserResource extends BaseResource {
     constructor(bounties: Bounties) {
         super(bounties)
     }
 
-    retrieve(address: string, params?: object) {
+    retrieve(address: string, params?: PlatformQueryParams): Promise<User> {
         return this.request.get(`user/${address}/profile/`, params)
     }
 
-    async login() {
-        return new Promise(async (resolve, reject) => {
+    async login(): Promise<LoginResponse> {
+        return new Promise(async (resolve: (result: LoginResponse) => void , reject) => {
             try {
                 const currentAddress = await getCurrentAddress(this.web3)
 
@@ -21,7 +24,7 @@ export class User extends BaseResource {
                     hasSignedUp
                 } = await this._calculateLoginSignature(currentAddress)
 
-                const user = await this.request.post(
+                const user: User = await this.request.post(
                     'auth/login/',
                     {
                         public_address: currentAddress,
@@ -36,7 +39,7 @@ export class User extends BaseResource {
         })
     }
 
-    logout() {
+    logout(): Promise<string> {
         return this.request.get('auth/logout/')
     }
 
@@ -44,7 +47,7 @@ export class User extends BaseResource {
         return this.request.get(`auth/${address}/nonce/`)
     }
 
-    async _calculateLoginSignature(address: string) {
+    async _calculateLoginSignature(address: string): Promise<{ signature: string, hasSignedUp: boolean }> {
         const {
             has_signed_up: hasSignedUp,
             nonce,

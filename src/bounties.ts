@@ -4,11 +4,11 @@ import { addJSON } from './utils/helpers'
 import { Metadata } from './utils/types'
 import { interfaces } from './contracts/interfaces'
 
-import { BountiesClient } from './resources/Bounties'
+import { BountiesResource } from './resources/Bounties'
 import { Request  } from './utils/request'
-import { User } from './resources/User'
-import { Categories } from './resources/Categories'
-import { Leaderboard } from './resources/Leaderboard'
+import { UserResource } from './resources/User'
+import { CategoriesResource } from './resources/Categories'
+import { LeaderboardResource } from './resources/Leaderboard'
 
 import { HumanStandardToken } from './contracts/types/HumanStandardToken'
 import { StandardBountiesFactory } from './contracts/types/StandardBountiesFactory'
@@ -23,10 +23,10 @@ class Bounties {
     _metadata: Metadata
 
     request: Request
-    bounties: BountiesClient
-    user: User
-    categories: Categories
-    leaderboard: Leaderboard
+    bounties: BountiesResource
+    user: UserResource
+    categories: CategoriesResource
+    leaderboard: LeaderboardResource
 
     constructor(web3: Web3, ipfs: any, factoryAddress: string, metadata: Metadata) {
         if (!(web3 instanceof Web3)) {
@@ -44,10 +44,10 @@ class Bounties {
         this._metadata = metadata
 
         this.request = new Request(this._endpoint)
-        this.bounties = new BountiesClient(this)
-        this.user = new User(this)
-        this.categories = new Categories(this)
-        this.leaderboard = new Leaderboard(this)
+        this.bounties = new BountiesResource(this)
+        this.user = new UserResource(this)
+        this.categories = new CategoriesResource(this)
+        this.leaderboard = new LeaderboardResource(this)
 
         this.tokenClient = this.tokenClient.bind(this)
     }

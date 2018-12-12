@@ -1,14 +1,13 @@
-import { BaseResource } from './base'
-import { Request } from '../utils/request'
+import { BaseResource } from '../base'
+import { Request } from '../../utils/request'
 // import { calculateDecimals } from '../utils/helpers'
 import { map, size, isArray } from 'lodash'
 import { BigNumber } from 'bignumber.js'
-import Bounties from '../bounties';
+import Bounties from '../../bounties';
 import { rejects } from 'assert';
-import { MutableBountyData, BountyData } from '../utils/types';
 
 
-export class Fulfillments extends BaseResource {
+export class FulfillmentsResource extends BaseResource {
     constructor(bounties: Bounties) {
         super(bounties)
     }
