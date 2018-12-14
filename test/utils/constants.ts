@@ -2,7 +2,10 @@ import { buildAddress, buildTxHash } from './helpers'
 import { Difficulty } from '../../src/utils/types';
 
 
-const USER_ADDRESS = '0xE23F91725c6c18204743592F963688B8B8DC2ceD'
+const API_URL = 'https://api.bounties.network'
+
+const USER_ADDRESS = '0x627306090abaB3A6e1400e9345bC60c78a8BEf57'
+const LOGIN_SIGNATURE = 'a very good signature'
 const FACTORY_ADDRESS = buildAddress(200)
 const BOUNTY_ADDRESS = buildAddress(300)
 const GAS = '0x9c40'
@@ -35,42 +38,6 @@ const BOUNTY_DATA = {
     metadata: BOUNTY_METADATA
 }
 
-const USER_FIELDS_TO_SANITIZE = [
-    'user.categories',
-    'user.dribble',
-    'user.edited',
-    'user.email',
-    'user.ens_domain',
-    'user.github',
-    'user.languages',
-    'user.large_profile_image_url',
-    'user.last_logged_in',
-    'user.last_viewed',
-    'user.linkedin',
-    'user.name',
-    'user.organization',
-    'user.page_preview',
-    'user.settings',
-    'user.skills',
-    'user.small_profile_image_url',
-    'user.twitter',
-    'user.wants_marketing_emails',
-    'user.website',
-]
-
-const STAT_FIELDS_TO_SANITIZE = [
-    'stats.awarded',
-    'stats.earned',
-    'stats.fulfiller_fulfillment_acceptance',
-    'stats.fulfiller_ratings_received',
-    'stats.issuer_fulfillment_acceptance',
-    'stats.issuer_ratings_given',
-    'stats.issuer_ratings_received',
-    'stats.total_bounties',
-    'stats.total_fulfillments',
-    'stats.total_fulfillments_on_bounties',
-]
-
 export const constants = {
     USER_ADDRESS,
     FACTORY_ADDRESS,
@@ -82,6 +49,6 @@ export const constants = {
     TX_OPTIONS,
     BOUNTY_DATA,
     BOUNTY_METADATA,
-    USER_FIELDS_TO_SANITIZE,
-    STAT_FIELDS_TO_SANITIZE
+    API_URL,
+    LOGIN_SIGNATURE,
 }

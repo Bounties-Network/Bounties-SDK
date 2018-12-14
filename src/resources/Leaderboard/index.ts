@@ -24,6 +24,6 @@ export class LeaderboardResource extends BaseResource {
     }
 
     _list(type: LeaderboardSortType, params?: DjangoListQueryParams) {
-        return this.request.get(`leaderboard/${type}`, params)
+        return this.request.get(`leaderboard/${type}/`, params)
     }
 }

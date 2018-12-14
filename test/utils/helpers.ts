@@ -1,6 +1,8 @@
 import Web3 from 'web3'
 import { cloneDeep, findIndex, has, set } from 'lodash';
 import { interfaces } from '../../src/contracts/interfaces'
+import { FakeHttpProvider } from './fakeHttpProvider';
+import { constants } from './constants'
 
 
 const web3 = new Web3()
@@ -33,6 +35,13 @@ export const methodSignature = (method: string) => (
         findIndex(interfaces.StandardBounty, item => item.name == method)
     ].signature.replace('0x', '')
 )
+
+export const injectSignatureResponse = (provider: FakeHttpProvider) => {
+    provider.injectResult(constants.LOGIN_SIGNATURE)
+    provider.injectValidation(payload => {
+        expect(payload.method).toEqual('eth_sign')
+    })
+}
 
 export const sanitize = (data: any, keys: string[]) => (
     keys.reduce(

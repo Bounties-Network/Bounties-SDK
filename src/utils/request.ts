@@ -37,7 +37,7 @@ export const HttpOptions: { [s: string]: HttpMethod } = {
     'PUT': {
         method: 'PUT',
         headers: {
-            accept: 'application/json',
+            Accept: 'application/json',
             'content-type': 'application/json'
         },
         withCredentials: true
@@ -45,7 +45,7 @@ export const HttpOptions: { [s: string]: HttpMethod } = {
     'POST': {
         method: 'POST',
         headers: {
-            accept: 'application/json',
+            Accept: 'application/json',
             'content-type': 'application/json'
         },
         withCredentials: true
@@ -53,7 +53,7 @@ export const HttpOptions: { [s: string]: HttpMethod } = {
     'PATCH': {
         method: 'PATCH',
         headers: {
-            accept: 'application/json',
+           Accept: 'application/json',
             'content-type': 'application/json'
         },
         withCredentials: true
@@ -61,7 +61,7 @@ export const HttpOptions: { [s: string]: HttpMethod } = {
     'OPTIONS': {
         method: 'OPTIONS',
         headers: {
-            accept: 'application/json',
+            Accept: 'application/json',
             'content-type': 'application/json'
         },
         withCredentials: true
