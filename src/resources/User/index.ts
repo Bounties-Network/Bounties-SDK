@@ -2,15 +2,14 @@ import { BaseResource } from '../base'
 import Bounties from '../../bounties';
 import { getCurrentAddress } from '../../utils/helpers'
 import { PlatformQueryParams } from '../../utils/types'
-import { User, LoginResponse } from './types'
-import { Log } from 'web3/types';
+import { UserAndStats, LoginResponse } from './types'
 
 export class UserResource extends BaseResource {
     constructor(bounties: Bounties) {
         super(bounties)
     }
 
-    retrieve(address: string, params?: PlatformQueryParams): Promise<User> {
+    retrieve(address: string, params?: PlatformQueryParams): Promise<UserAndStats> {
         return this.request.get(`user/${address}/profile/`, params)
     }
 
@@ -24,7 +23,7 @@ export class UserResource extends BaseResource {
                     hasSignedUp
                 } = await this._calculateLoginSignature(currentAddress)
 
-                const user: User = await this.request.post(
+                const user: UserAndStats = await this.request.post(
                     'auth/login/',
                     {
                         public_address: currentAddress,
