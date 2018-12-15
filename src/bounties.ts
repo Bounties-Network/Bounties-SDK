@@ -10,6 +10,7 @@ import { UserResource } from './resources/User'
 import { CategoriesResource } from './resources/Categories'
 import { LeaderboardResource } from './resources/Leaderboard'
 import { ReviewsResource } from './resources/Reviews'
+import { CommentsResource } from './resources/Comments'
 
 import { HumanStandardToken } from './contracts/types/HumanStandardToken'
 import { StandardBountiesFactory } from './contracts/types/StandardBountiesFactory'
@@ -29,6 +30,7 @@ class Bounties {
     categories: CategoriesResource
     leaderboard: LeaderboardResource
     reviews: ReviewsResource
+    comments: CommentsResource
 
     constructor(web3: Web3, ipfs: any, factoryAddress: string, metadata: Metadata) {
         if (!(web3 instanceof Web3)) {
@@ -51,6 +53,7 @@ class Bounties {
         this.categories = new CategoriesResource(this)
         this.leaderboard = new LeaderboardResource(this)
         this.reviews = new ReviewsResource(this)
+        this.comments = new CommentsResource(this)
 
         this.tokenClient = this.tokenClient.bind(this)
     }

@@ -43,7 +43,7 @@ export class ReviewsResource extends BaseResource {
         return this.request.get(`reviews/`, addressOrParams)
     }
 
-    create(bountyAddress: string, fulfillmentId: number, rating: (1|2|3|4|5), review: string) {
+    create(bountyAddress: string, fulfillmentId: number, rating: number, review: string) {
         return this.request.post(
             `bounty/${bountyAddress}/fulfillment/${fulfillmentId}/review/`,
             {

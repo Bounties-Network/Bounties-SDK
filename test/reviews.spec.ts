@@ -59,8 +59,16 @@ describe('reviews resource', () => {
 
     describe('create', () => {
         it('should create review', async () => {
-            nock.post(`/bounty/${BOUNTY_ADDRESS}/fulfillment/0/review/`).reply(200, ReviewsMocks.review)
-            const review = bounties.reviews.create(BOUNTY_ADDRESS, 0, 5, 'Very very good!')
+            nock.post(
+                `/bounty/${BOUNTY_ADDRESS}/fulfillment/0/review/`,
+                {
+                    rating: ReviewsMocks.review.rating,
+                    review: ReviewsMocks.review.review,
+                    platform: bounties._metadata.platform,
+                }
+            ).reply(200, ReviewsMocks.review)
+
+            const review = bounties.reviews.create(BOUNTY_ADDRESS, 0, ReviewsMocks.review.rating, ReviewsMocks.review.review)
             await expect(review).resolves.toEqual(ReviewsMocks.review)
         })
     })
