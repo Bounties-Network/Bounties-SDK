@@ -2,7 +2,7 @@
 
 Our SDK around managin web3 client states, web3 interactions, and interacting directly with our [standard bounties contract](https://github.com/Bounties-Network/StandardBounties/) and our [off-chain API endpoints](https://github.com/Bounties-Network/bountiesapi)
 
-Reference [documentation here](https://dash.readme.io/go/bounties-public-modules)
+Reference [documentation here](https://bounties.readme.io/docs/bounties-sdk-getting-started)
 
 This library is currently in alpha, and we are finalizing the pieces (build, structure, etc.) in order to make it a public, open source, configurable library.
 
